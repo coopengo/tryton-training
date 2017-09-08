@@ -7,6 +7,7 @@ def register():
     Pool.register(
         library.Genre,
         library.Editor,
+        library.EditorGenreRelation,
         library.Author,
         library.Book,
         library.Exemplary,
