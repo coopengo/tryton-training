@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<tryton>
+    <data>
+        <!-- ########## -->
+        <!-- # Author # -->
+        <!-- ########## -->
+        <record model="ir.ui.view" id="author_view_form">
+            <field name="model">library.author</field>
+            <field name="type">form</field>
+            <field name="name">author_form</field>
+        </record>
+        <record model="ir.ui.view" id="author_view_list">
+            <field name="model">library.author</field>
+            <field name="type">tree</field>
+            <field name="name">author_list</field>
+        </record>
+    </data>
+</tryton>
