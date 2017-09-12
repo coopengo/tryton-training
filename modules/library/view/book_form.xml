@@ -4,6 +4,8 @@
         <field name="cover" widget="image"/>
     </group>
     <group id="right" string="" colspan="3" col="2" yfill="1">
+        <label name="title"/>
+        <field name="title"/>
         <label name="author"/>
         <field name="author"/>
         <label name="genre"/>
