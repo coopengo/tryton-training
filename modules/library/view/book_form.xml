@@ -1,3 +1,28 @@
 <?xml version="1.0"?>
 <form>
+    <group id="left" string="" colspan="1" xexpand="0" xfill="1">
+        <field name="cover" widget="image"/>
+    </group>
+    <group id="right" string="" colspan="3" col="2" yfill="1">
+        <label name="author"/>
+        <field name="author"/>
+        <label name="genre"/>
+        <field name="genre"/>
+        <label name="editor"/>
+        <field name="editor"/>
+    </group>
+    <notebook colspan="4">
+        <page name="summary" col="2">
+            <label name="description"/>
+            <field name="description"/>
+            <separator name="summary" colspan="2"/>
+            <field name="summary" colspan="2"/>
+        </page>
+        <page id="other_data" string="Other informations">
+            <label name="page_count"/>
+            <field name="page_count"/>
+            <label name="edition_stopped"/>
+            <field name="edition_stopped"/>
+        </page>
+    </notebook>
 </form>

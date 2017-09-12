@@ -1,6 +1,10 @@
 <?xml version="1.0"?>
 <tryton>
     <data>
+        <!-- ############# -->
+        <!-- # Root Menu # -->
+        <!-- ############# -->
+        <menuitem name="Library" id="menu_library" sequence="1"/>
         <!-- ######### -->
         <!-- # Genre # -->
         <!-- ######### -->
@@ -40,6 +44,21 @@
             <field name="type">tree</field>
             <field name="name">author_list</field>
         </record>
+        <record model="ir.action.act_window" id="act_author">
+            <field name="name">Authors</field>
+            <field name="res_model">library.author</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_author_view_list">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="author_view_list"/>
+            <field name="act_window" ref="act_author"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_author_view_form">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="author_view_form"/>
+            <field name="act_window" ref="act_author"/>
+        </record>
+        <menuitem parent="menu_library" sequence="1" action="act_author" id="menu_author"/>
         <!-- ######## -->
         <!-- # Book # -->
         <!-- ######## -->
