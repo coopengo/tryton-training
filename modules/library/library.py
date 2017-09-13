@@ -53,6 +53,7 @@ class Author(ModelSQL, ModelView):
 class Book(ModelSQL, ModelView):
     'Book'
     __name__ = 'library.book'
+    _rec_name = 'title'
 
     author = fields.Many2One('library.author', 'Author', required=True,
         ondelete='CASCADE')
