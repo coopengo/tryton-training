@@ -12,6 +12,10 @@
         <field name="genre" widget="selection"/>
         <label name="editor"/>
         <field name="editor"/>
+        <label name="publishing_date"/>
+        <field name="publishing_date"/>
+        <label name="isbn"/>
+        <field name="isbn"/>
     </group>
     <notebook colspan="4">
         <page name="summary" col="2">
@@ -20,11 +24,18 @@
             <separator name="summary" colspan="2"/>
             <field name="summary" colspan="2"/>
         </page>
+        <page name="exemplaries">
+            <field name="exemplaries"/>
+        </page>
         <page id="other_data" string="Other informations">
             <label name="page_count"/>
             <field name="page_count"/>
             <label name="edition_stopped"/>
             <field name="edition_stopped"/>
+            <label name="number_of_exemplaries"/>
+            <field name="number_of_exemplaries"/>
+            <label name="latest_exemplary"/>
+            <field name="latest_exemplary"/>
         </page>
     </notebook>
 </form>

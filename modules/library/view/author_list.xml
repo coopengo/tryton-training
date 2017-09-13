@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <tree>
     <field name="name" expand="1"/>
+    <field name="latest_book" expand="1"/>
     <field name="birth_date"/>
     <field name="death_date"/>
 </tree>
