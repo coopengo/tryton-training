@@ -76,6 +76,7 @@ class Book(ModelSQL, ModelView):
 class Exemplary(ModelSQL, ModelView):
     'Exemplary'
     __name__ = 'library.book.exemplary'
+    _rec_name = 'identifier'
 
     book = fields.Many2One('library.book', 'Book', ondelete='CASCADE',
         required=True)
