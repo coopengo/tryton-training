@@ -158,7 +158,7 @@ class Book(ModelSQL, ModelView):
         required=False)
     editor = fields.Many2One('library.editor', 'Editor', ondelete='RESTRICT',
         required=True)
-    isbn = fields.Integer('ISBN',
+    isbn = fields.Char('ISBN', size=13,
         help='The International Standard Book Number')
     publishing_date = fields.Date('Publishing date')
     description = fields.Char('Description')
