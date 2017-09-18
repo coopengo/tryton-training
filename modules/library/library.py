@@ -26,6 +26,8 @@ class Genre(ModelSQL, ModelView):
     __name__ = 'library.genre'
 
     name = fields.Char('Name', required=True)
+    editors = fields.Many2Many('library.editor-library.genre', 'genre',
+        'editor', 'Editors', readonly=True)
 
 
 class Editor(ModelSQL, ModelView):
@@ -75,7 +77,11 @@ class Author(ModelSQL, ModelView):
     birth_date = fields.Date('Birth date',
         states={'required': Bool(Eval('death_date', 'False'))},
         depends=['death_date'])
-    death_date = fields.Date('Death date')
+    death_date = fields.Date('Death date',
+        domain=['OR', ('death_date', '=', None),
+            ('death_date', '>', Eval('birth_date'))],
+        states={'invisible': ~Eval('birth_date')},
+        depends=['birth_date'])
     gender = fields.Selection([('man', 'Man'), ('woman', 'Woman')], 'Gender')
     age = fields.Function(
         fields.Integer('Age', states={'invisible': ~Eval('death_date')}),
@@ -84,10 +90,12 @@ class Author(ModelSQL, ModelView):
         fields.Integer('Number of books'),
         'getter_number_of_books')
     genres = fields.Function(
-        fields.Many2Many('library.genre', None, None, 'Genres'),
+        fields.Many2Many('library.genre', None, None, 'Genres',
+            states={'invisible': ~Eval('books', False)}),
         'getter_genres', searcher='searcher_genres')
     latest_book = fields.Function(
-        fields.Many2One('library.book', 'Latest Book'),
+        fields.Many2One('library.book', 'Latest Book',
+            states={'invisible': ~Eval('books', False)}),
         'getter_latest_book')
 
     def getter_age(self, name):
@@ -159,6 +167,7 @@ class Book(ModelSQL, ModelView):
         'Exemplaries')
     title = fields.Char('Title', required=True)
     genre = fields.Many2One('library.genre', 'Genre', ondelete='RESTRICT',
+        domain=[('editors', '=', Eval('editor'))], depends=['editor'],
         required=False)
     editor = fields.Many2One('library.editor', 'Editor', ondelete='RESTRICT',
         domain=[If(
@@ -186,8 +195,15 @@ class Book(ModelSQL, ModelView):
     @classmethod
     def __setup__(cls):
         super(Book, cls).__setup__()
+        t = cls.__table__()
+        cls._sql_constraints += [
+            ('author_title_uniq', Unique(t, t.author, t.title),
+                'The title must be unique per author!'),
+            ]
         cls._error_messages.update({
                 'invalid_isbn': 'ISBN should only be digits',
+                'bad_isbn_size': 'ISBN must have 13 digits',
+                'invalid_isbn_checksum': 'ISBN checksum invalid',
                 })
 
     @classmethod
@@ -200,6 +216,13 @@ class Book(ModelSQL, ModelView):
                     raise ValueError
             except ValueError:
                 cls.raise_user_error('invalid_isbn')
+            if len(book.isbn) != 13:
+                cls.raise_user_error('bad_isbn_size')
+            checksum = 0
+            for idx, digit in enumerate(book.isbn):
+                checksum += int(digit) * (1 if idx % 2 else 3)
+            if not(checksum % 10):
+                cls.raise_user_error('invalid_isbn_checksum')
 
     def getter_latest_exemplary(self, name):
         latest = None
