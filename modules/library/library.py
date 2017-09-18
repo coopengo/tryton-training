@@ -244,6 +244,6 @@ class Exemplary(ModelSQL, ModelView):
         super(Exemplary, cls).__setup__()
         t = cls.__table__()
         cls._sql_constraints += [
-            ('identifier_uniq', Unique(t, t.code),
+            ('identifier_uniq', Unique(t, t.identifier),
                 'The identifier must be unique!'),
             ]
