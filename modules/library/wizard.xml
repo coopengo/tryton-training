@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<tryton>
+    <data>
+        <!-- ###################### -->
+        <!-- # Create Exemplaries # -->
+        <!-- ###################### -->
+        <record model="ir.action.wizard" id="act_create_exemplaries">
+            <field name="name">Create Exemplaries</field>
+            <field name="wiz_name">library.book.create_exemplaries</field>
+        </record>
+        <record model="ir.action.keyword" id="act_create_exemplaries_keyword">
+            <field name="keyword">form_action</field>
+            <field name="model">library.book,-1</field>
+            <field name="action" ref="act_create_exemplaries"/>
+        </record>
+        <!-- ################################# -->
+        <!-- # Create Exemplaries Parameters # -->
+        <!-- ################################# -->
+        <record model="ir.ui.view" id="create_exemplaries_parameters_view_form">
+            <field name="model">library.book.create_exemplaries.parameters</field>
+            <field name="type">form</field>
+            <field name="name">create_exemplaries_parameters_form</field>
+        </record>
+    </data>
+</tryton>
