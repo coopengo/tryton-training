@@ -76,12 +76,12 @@
         <!-- # Exemplary # -->
         <!-- ############# -->
         <record model="ir.ui.view" id="exemplary_view_form">
-            <field name="model">library.exemplary</field>
+            <field name="model">library.book.exemplary</field>
             <field name="type">form</field>
             <field name="name">exemplary_form</field>
         </record>
         <record model="ir.ui.view" id="exemplary_view_list">
-            <field name="model">library.exemplary</field>
+            <field name="model">library.book.exemplary</field>
             <field name="type">tree</field>
             <field name="name">exemplary_list</field>
         </record>
