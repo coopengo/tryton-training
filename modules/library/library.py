@@ -136,7 +136,7 @@ class Author(ModelSQL, ModelView):
 
     @classmethod
     def getter_latest_book(cls, authors, name):
-        result = {x.id: 0 for x in authors}
+        result = {x.id: None for x in authors}
         Book = Pool().get('library.book')
         book = Book.__table__()
         sub_book = Book.__table__()
