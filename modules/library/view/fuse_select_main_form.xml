@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<form>
+    <label name="main_book"/>
+    <field name="main_book" widget="selection" colspan="3"/>
+    <label name="number_of_exemplaries"/>
+    <field name="number_of_exemplaries" colspan="3"/>
+    <field name="selected_books" colspan="4"/>
+</form>

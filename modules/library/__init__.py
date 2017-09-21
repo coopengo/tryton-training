@@ -13,8 +13,11 @@ def register():
         library.Book,
         library.Exemplary,
         wizard.CreateExemplariesParameters,
+        wizard.FuseBooksSelectMain,
+        wizard.FuseBooksPreview,
         module='library', type_='model')
 
     Pool.register(
         wizard.CreateExemplaries,
+        wizard.FuseBooks,
         module='library', type_='wizard')
