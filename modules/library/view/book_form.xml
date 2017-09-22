@@ -38,4 +38,5 @@
             <field name="latest_exemplary"/>
         </page>
     </notebook>
+    <button string="Create exemplaries" name="create_exemplaries" icon="tryton-new" colspan="4"/>
 </form>

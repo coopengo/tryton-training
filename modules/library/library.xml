@@ -117,6 +117,17 @@
             <field name="view" ref="book_view_form"/>
             <field name="act_window" ref="act_book"/>
         </record>
+        <record model="ir.action.act_window.domain" id="act_book_domain_recent">
+            <field name="name">Recent</field>
+            <field name="sequence" eval="10"/>
+            <field name="domain" eval="[('publishing_date', '>', Date(delta_years=-1))]" pyson="1"/>
+            <field name="act_window" ref="act_book"/>
+        </record>
+        <record model="ir.action.act_window.domain" id="act_book_domain_all">
+            <field name="name">All</field>
+            <field name="sequence" eval="20"/>
+            <field name="act_window" ref="act_book"/>
+        </record>
         <menuitem parent="menu_library" sequence="2" action="act_book" id="menu_book"/>
         <!-- ############# -->
         <!-- # Exemplary # -->
@@ -144,6 +155,29 @@
             <field name="sequence" eval="20"/>
             <field name="view" ref="exemplary_view_form"/>
             <field name="act_window" ref="act_exemplary"/>
+        </record>
+        <!-- ########### -->
+        <!-- # Relates # -->
+        <!-- ########### -->
+        <record model="ir.action.act_window" id="act_genre_book_relation">
+            <field name="name">Books</field>
+            <field name="res_model">library.book</field>
+            <field name="domain" eval="[('genre', '=', Eval('active_id'))]" pyson="1"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_genre_book_relation_view1">
+            <field name="sequence" eval="1"/>
+            <field name="view" ref="book_view_list"/>
+            <field name="act_window" ref="act_genre_book_relation"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_genre_book_relation_view2">
+            <field name="sequence" eval="1"/>
+            <field name="view" ref="book_view_form"/>
+            <field name="act_window" ref="act_genre_book_relation"/>
+        </record>
+        <record model="ir.action.keyword" id="act_open_book_relation_keyword1">
+            <field name="keyword">form_relate</field>
+            <field name="model">library.genre,-1</field>
+            <field name="action" ref="act_genre_book_relation"/>
         </record>
     </data>
 </tryton>
