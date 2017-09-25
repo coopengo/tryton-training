@@ -159,6 +159,7 @@
         <!-- ########### -->
         <!-- # Relates # -->
         <!-- ########### -->
+        <!-- Genre -> Books -->
         <record model="ir.action.act_window" id="act_genre_book_relation">
             <field name="name">Books</field>
             <field name="res_model">library.book</field>
@@ -179,6 +180,7 @@
             <field name="model">library.genre,-1</field>
             <field name="action" ref="act_genre_book_relation"/>
         </record>
+        <!-- Editor -> Books -->
         <record model="ir.action.act_window" id="act_editor_book_relation">
             <field name="name">Books</field>
             <field name="res_model">library.book</field>
@@ -199,6 +201,7 @@
             <field name="model">library.editor,-1</field>
             <field name="action" ref="act_editor_book_relation"/>
         </record>
+        <!-- Author -> Books -->
         <record model="ir.action.act_window" id="act_author_book_relation">
             <field name="name">Books</field>
             <field name="res_model">library.book</field>
@@ -218,6 +221,27 @@
             <field name="keyword">form_relate</field>
             <field name="model">library.author,-1</field>
             <field name="action" ref="act_author_book_relation"/>
+        </record>
+        <!-- Book -> Exemplaries -->
+        <record model="ir.action.act_window" id="act_open_book_exemplaries">
+            <field name="name">Exemplaries</field>
+            <field name="res_model">library.book.exemplary</field>
+            <field name="domain">[('book', '=', Eval('id'))]</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_open_book_exemplaries_view1">
+            <field name="sequence" eval="1"/>
+            <field name="view" ref="exemplary_view_list"/>
+            <field name="act_window" ref="act_open_book_exemplaries"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_open_book_exemplaries_view2">
+            <field name="sequence" eval="2"/>
+            <field name="view" ref="exemplary_view_form"/>
+            <field name="act_window" ref="act_open_book_exemplaries"/>
+        </record>
+        <record model="ir.action.keyword" id="act_open_exemplaries_keyword1">
+            <field name="keyword">form_relate</field>
+            <field name="model">library.book,-1</field>
+            <field name="action" ref="act_open_book_exemplaries"/>
         </record>
     </data>
 </tryton>
