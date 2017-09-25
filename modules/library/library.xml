@@ -226,7 +226,7 @@
         <record model="ir.action.act_window" id="act_open_book_exemplaries">
             <field name="name">Exemplaries</field>
             <field name="res_model">library.book.exemplary</field>
-            <field name="domain" eval="[('book', '=', Eval('id'))]" pyson="1"/>
+            <field name="domain" eval="[('book', '=', Eval('active_id'))]" pyson="1"/>
         </record>
         <record model="ir.action.act_window.view" id="act_open_book_exemplaries_view1">
             <field name="sequence" eval="1"/>
