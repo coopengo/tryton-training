@@ -326,3 +326,6 @@ class Exemplary(ModelSQL, ModelView):
     @classmethod
     def default_acquisition_date(cls):
         return datetime.date.today()
+
+    def get_rec_name(self, name):
+        return '%s: %s' % (self.book.rec_name, self.identifier)
