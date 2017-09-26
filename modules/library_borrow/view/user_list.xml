@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<tree>
+    <field name="name" expand="1"/>
+    <field name="registration_date"/>
+    <field name="expected_return_date"/>
+    <field name="checkedout_books"/>
+</tree>

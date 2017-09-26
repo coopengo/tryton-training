@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<form>
+    <label name="user"/>
+    <field name="user" colspan="3"/>
+    <label name="exemplary"/>
+    <field name="exemplary" colspan="3"/>
+    <label name="date"/>
+    <field name="date"/>
+    <label name="expected_return_date"/>
+    <field name="expected_return_date"/>
+    <label name="return_date"/>
+    <field name="return_date"/>
+</form>

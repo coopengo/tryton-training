@@ -1,0 +1,169 @@
+<?xml version="1.0"?>
+<tryton>
+    <data>
+        <!-- ######### -->
+        <!-- # Users # -->
+        <!-- ######### -->
+        <record model="ir.ui.view" id="user_view_form">
+            <field name="model">library.user</field>
+            <field name="type">form</field>
+            <field name="name">user_form</field>
+        </record>
+        <record model="ir.ui.view" id="user_view_list">
+            <field name="model">library.user</field>
+            <field name="type">tree</field>
+            <field name="name">user_list</field>
+        </record>
+        <record model="ir.action.act_window" id="act_open_user">
+            <field name="name">Users</field>
+            <field name="res_model">library.user</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_open_user_view_list">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="user_view_list"/>
+            <field name="act_window" ref="act_open_user"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_open_user_view_form">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="user_view_form"/>
+            <field name="act_window" ref="act_open_user"/>
+        </record>
+        <menuitem parent="library.menu_library" sequence="30" action="act_open_user" id="menu_open_user"/>
+        <record model="ir.action.act_window" id="act_open_late_users">
+            <field name="name">Late Users</field>
+            <field name="res_model">library.user</field>
+            <field name="domain" eval="[('expected_return_date', '&lt;', Date())]" pyson="1"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_open_late_users_view_list">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="user_view_list"/>
+            <field name="act_window" ref="act_open_late_users"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_open_late_users_view_form">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="user_view_form"/>
+            <field name="act_window" ref="act_open_late_users"/>
+        </record>
+        <menuitem parent="library.menu_library" sequence="40" action="act_open_late_users" id="menu_open_late_users"/>
+        <!-- ############ -->
+        <!-- # Checkout # -->
+        <!-- ############ -->
+        <record model="ir.ui.view" id="user_checkout_view_form">
+            <field name="model">library.user.checkout</field>
+            <field name="type">form</field>
+            <field name="name">user_checkout_form</field>
+        </record>
+        <record model="ir.ui.view" id="user_checkout_view_list">
+            <field name="model">library.user.checkout</field>
+            <field name="type">tree</field>
+            <field name="name">user_checkout_list</field>
+        </record>
+        <record model="ir.action.act_window" id="act_open_user_checkout">
+            <field name="name">Checkouts</field>
+            <field name="res_model">library.user.checkout</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_open_user_checkout_view_list">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="user_checkout_view_list"/>
+            <field name="act_window" ref="act_open_user_checkout"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_open_user_checkout_view_form">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="user_checkout_view_form"/>
+            <field name="act_window" ref="act_open_user_checkout"/>
+        </record>
+        <!-- ######## -->
+        <!-- # Book # -->
+        <!-- ######## -->
+        <record model="ir.ui.view" id="book_view_form">
+            <field name="model">library.book</field>
+            <field name="inherit" ref="library.book_view_form"/>
+            <field name="name">book_form</field>
+        </record>
+        <record model="ir.ui.view" id="book_view_list">
+            <field name="model">library.book</field>
+            <field name="inherit" ref="library.book_view_list"/>
+            <field name="name">book_list</field>
+        </record>
+        <!-- ############# -->
+        <!-- # Exemplary # -->
+        <!-- ############# -->
+        <record model="ir.ui.view" id="exemplary_view_form">
+            <field name="model">library.book.exemplary</field>
+            <field name="inherit" ref="library.exemplary_view_form"/>
+            <field name="name">exemplary_form</field>
+        </record>
+        <record model="ir.ui.view" id="exemplary_view_list">
+            <field name="model">library.book.exemplary</field>
+            <field name="inherit" ref="library.exemplary_view_list"/>
+            <field name="name">exemplary_list</field>
+        </record>
+        <!-- ########### -->
+        <!-- # Relates # -->
+        <!-- ########### -->
+        <!-- User -> Checkouts relate -->
+        <record model="ir.action.act_window" id="act_open_user_checkouts">
+            <field name="name">Checkouts</field>
+            <field name="res_model">library.user.checkout</field>
+            <field name="domain" eval="[('user', '=', Eval('active_id'))]" pyson="1"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_open_user_checkouts_view1">
+            <field name="sequence" eval="1"/>
+            <field name="view" ref="user_checkout_view_list"/>
+            <field name="act_window" ref="act_open_user_checkouts"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_open_user_checkouts_view2">
+            <field name="sequence" eval="2"/>
+            <field name="view" ref="user_checkout_view_form"/>
+            <field name="act_window" ref="act_open_user_checkouts"/>
+        </record>
+        <record model="ir.action.act_window.domain" id="act_user_checkout_domain_ongoing">
+            <field name="name">Ongoing</field>
+            <field name="sequence" eval="10"/>
+            <field name="domain" eval="[('return_date', '=', None)]" pyson="1"/>
+            <field name="act_window" ref="act_open_user_checkouts"/>
+        </record>
+        <record model="ir.action.act_window.domain" id="act_user_checkout_domain_all">
+            <field name="name">All</field>
+            <field name="sequence" eval="20"/>
+            <field name="act_window" ref="act_open_user_checkouts"/>
+        </record>
+        <record model="ir.action.keyword" id="act_open_user_checkouts_keyword1">
+            <field name="keyword">form_relate</field>
+            <field name="model">library.user,-1</field>
+            <field name="action" ref="act_open_user_checkouts"/>
+        </record>
+        <!-- Book -> Checkouts relate -->
+        <record model="ir.action.act_window" id="act_open_book_checkouts">
+            <field name="name">Checkouts</field>
+            <field name="res_model">library.user.checkout</field>
+            <field name="domain" eval="[('exemplary.book', '=', Eval('active_id'))]" pyson="1"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_open_book_checkouts_view1">
+            <field name="sequence" eval="1"/>
+            <field name="view" ref="user_checkout_view_list"/>
+            <field name="act_window" ref="act_open_book_checkouts"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_open_book_checkouts_view2">
+            <field name="sequence" eval="2"/>
+            <field name="view" ref="user_checkout_view_form"/>
+            <field name="act_window" ref="act_open_book_checkouts"/>
+        </record>
+        <record model="ir.action.act_window.domain" id="act_book_checkout_domain_ongoing">
+            <field name="name">Ongoing</field>
+            <field name="sequence" eval="10"/>
+            <field name="domain" eval="[('return_date', '=', None)]" pyson="1"/>
+            <field name="act_window" ref="act_open_book_checkouts"/>
+        </record>
+        <record model="ir.action.act_window.domain" id="act_book_checkout_domain_all">
+            <field name="name">All</field>
+            <field name="sequence" eval="20"/>
+            <field name="act_window" ref="act_open_book_checkouts"/>
+        </record>
+        <record model="ir.action.keyword" id="act_open_book_checkouts_keyword1">
+            <field name="keyword">form_relate</field>
+            <field name="model">library.book,-1</field>
+            <field name="action" ref="act_open_book_checkouts"/>
+        </record>
+    </data>
+</tryton>

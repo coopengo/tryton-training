@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<form>
+    <label name="name"/>
+    <field name="name" colspan="3"/>
+    <label name="registration_date"/>
+    <field name="registration_date" colspan="3"/>
+    <label name="checkedout_books"/>
+    <field name="checkedout_books"/>
+    <label name="late_checkedout_books"/>
+    <field name="late_checkedout_books"/>
+    <label name="expected_return_date"/>
+    <field name="expected_return_date"/>
+</form>
