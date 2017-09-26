@@ -202,9 +202,6 @@ class Exemplary:
             result[exemplary_id] = False
         return result
 
-    def get_rec_name(self, name):
-        return '%s: %s' % (self.book.rec_name, self.identifier)
-
     @classmethod
     def search_rec_name(cls, name, clause):
         return ['OR',
