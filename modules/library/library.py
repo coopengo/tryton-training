@@ -210,3 +210,6 @@ class Exemplary(ModelSQL, ModelView):
     identifier = fields.Char('Identifier', required=True)
     acquisition_date = fields.Date('Acquisition Date')
     acquisition_price = fields.Numeric('Acquisition Price', digits=(16, 2))
+
+    def get_rec_name(self, name):
+        return '%s: %s' % (self.book.rec_name, self.identifier)
