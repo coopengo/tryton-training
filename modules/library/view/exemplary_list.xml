@@ -1,4 +1,4 @@
 <?xml version="1.0"?>
 <tree>
-    <field name="identifier"/>
+    <field name="rec_name"/>
 </tree>
