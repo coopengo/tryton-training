@@ -270,3 +270,6 @@ class Exemplary(ModelSQL, ModelView):
             ('identifier_uniq', Unique(t, t.identifier),
                 'The identifier must be unique!'),
             ]
+
+    def get_rec_name(self, name):
+        return '%s: %s' % (self.book.rec_name, self.identifier)
