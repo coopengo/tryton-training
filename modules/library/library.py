@@ -152,7 +152,7 @@ class Author(ModelSQL, ModelView):
         return result
 
     @classmethod
-    def searcher_genres(self, name, clause):
+    def searcher_genres(cls, name, clause):
         return []
 
 
