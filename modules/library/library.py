@@ -38,15 +38,21 @@ class Author(ModelSQL, ModelView):
     'Author'
     __name__ = 'library.author'
 
+    books = fields.One2Many('library.book', 'author', 'Books')
+
 
 class Book(ModelSQL, ModelView):
     'Book'
     __name__ = 'library.book'
 
+    author = fields.Many2One('library.author', 'Author', required=True,
+        ondelete='CASCADE')
     exemplaries = fields.One2Many('library.book.exemplary', 'book',
         'Exemplaries')
     genre = fields.Many2One('library.genre', 'Genre', ondelete='RESTRICT',
         required=False)
+    editor = fields.Many2One('library.editor', 'Editor', ondelete='RESTRICT',
+        required=True)
 
 
 class Exemplary(ModelSQL, ModelView):
