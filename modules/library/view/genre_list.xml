@@ -1,3 +1,4 @@
 <?xml version="1.0"?>
 <tree>
+    <field name="name" expand="1"/>
 </tree>

@@ -1,3 +1,6 @@
 <?xml version="1.0"?>
 <tree>
+    <field name="title"/>
+    <field name="author"/>
+    <field name="genre"/>
 </tree>
