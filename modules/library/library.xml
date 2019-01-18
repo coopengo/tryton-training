@@ -5,7 +5,6 @@
         <!-- # Root Menu # -->
         <!-- ############# -->
         <menuitem name="Library" id="menu_library" sequence="1"/>
-        <menuitem name="Configuration" id="menu_library_configuration" parent="menu_library" sequence="0"/>
         <!-- ######### -->
         <!-- # Genre # -->
         <!-- ######### -->
@@ -19,21 +18,6 @@
             <field name="type">tree</field>
             <field name="name">genre_list</field>
         </record>
-        <record model="ir.action.act_window" id="act_genre">
-            <field name="name">Genres</field>
-            <field name="res_model">library.genre</field>
-        </record>
-        <record model="ir.action.act_window.view" id="act_genre_view_list">
-            <field name="sequence" eval="10"/>
-            <field name="view" ref="genre_view_list"/>
-            <field name="act_window" ref="act_genre"/>
-        </record>
-        <record model="ir.action.act_window.view" id="act_genre_view_form">
-            <field name="sequence" eval="20"/>
-            <field name="view" ref="genre_view_form"/>
-            <field name="act_window" ref="act_genre"/>
-        </record>
-        <menuitem parent="menu_library_configuration" sequence="1" action="act_genre" id="menu_genre"/>
         <!-- ########## -->
         <!-- # Editor # -->
         <!-- ########## -->
@@ -47,21 +31,6 @@
             <field name="type">tree</field>
             <field name="name">editor_list</field>
         </record>
-        <record model="ir.action.act_window" id="act_editor">
-            <field name="name">Editors</field>
-            <field name="res_model">library.editor</field>
-        </record>
-        <record model="ir.action.act_window.view" id="act_editor_view_list">
-            <field name="sequence" eval="10"/>
-            <field name="view" ref="editor_view_list"/>
-            <field name="act_window" ref="act_editor"/>
-        </record>
-        <record model="ir.action.act_window.view" id="act_editor_view_form">
-            <field name="sequence" eval="20"/>
-            <field name="view" ref="editor_view_form"/>
-            <field name="act_window" ref="act_editor"/>
-        </record>
-        <menuitem parent="menu_library_configuration" sequence="2" action="act_editor" id="menu_editor"/>
         <!-- ########## -->
         <!-- # Author # -->
         <!-- ########## -->
@@ -103,21 +72,6 @@
             <field name="type">tree</field>
             <field name="name">book_list</field>
         </record>
-        <record model="ir.action.act_window" id="act_book">
-            <field name="name">Books</field>
-            <field name="res_model">library.book</field>
-        </record>
-        <record model="ir.action.act_window.view" id="act_book_view_list">
-            <field name="sequence" eval="10"/>
-            <field name="view" ref="book_view_list"/>
-            <field name="act_window" ref="act_book"/>
-        </record>
-        <record model="ir.action.act_window.view" id="act_book_view_form">
-            <field name="sequence" eval="20"/>
-            <field name="view" ref="book_view_form"/>
-            <field name="act_window" ref="act_book"/>
-        </record>
-        <menuitem parent="menu_library" sequence="2" action="act_book" id="menu_book"/>
         <!-- ############# -->
         <!-- # Exemplary # -->
         <!-- ############# -->

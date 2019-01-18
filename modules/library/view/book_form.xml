@@ -9,7 +9,7 @@
         <label name="author"/>
         <field name="author"/>
         <label name="genre"/>
-        <field name="genre" widget="selection"/>
+        <field name="genre"/>
         <label name="editor"/>
         <field name="editor"/>
     </group>
