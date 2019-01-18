@@ -1,3 +1,9 @@
+import datetime
+
+from sql.aggregate import Count
+
+from trytond.pool import Pool
+from trytond.transaction import Transaction
 from trytond.model import ModelSQL, ModelView, fields
 
 
@@ -48,6 +54,36 @@ class Author(ModelSQL, ModelView):
     birth_date = fields.Date('Birth date')
     death_date = fields.Date('Death date')
     gender = fields.Selection([('man', 'Man'), ('woman', 'Woman')], 'Gender')
+    age = fields.Function(
+        fields.Integer('Age'),
+        'getter_age')
+    number_of_books = fields.Function(
+        fields.Integer('Number of books'),
+        'getter_number_of_books')
+
+    def getter_age(self, name):
+        if not self.birth_date:
+            return None
+        end_date = self.death_date or datetime.date.today()
+        age = end_date.year - self.birth_date.year
+        if (end_date.month, end_date.day) < (
+                self.birth_date.month, self.birth_date.day):
+            age -= 1
+        return age
+
+    @classmethod
+    def getter_number_of_books(cls, authors, name):
+        result = {x.id: 0 for x in authors}
+        Book = Pool().get('library.book')
+        book = Book.__table__()
+
+        cursor = Transaction().connection.cursor()
+        cursor.execute(*book.select(book.author, Count(book.id),
+                where=book.author.in_([x.id for x in authors]),
+                group_by=[book.author]))
+        for author_id, count in cursor.fetchall():
+            result[author_id] = count
+        return result
 
 
 class Book(ModelSQL, ModelView):
