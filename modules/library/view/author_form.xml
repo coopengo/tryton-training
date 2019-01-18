@@ -11,7 +11,11 @@
     <field name="death_date"/>
     <label name="age"/>
     <field name="age"/>
+    <newline/>
     <label name="number_of_books"/>
     <field name="number_of_books"/>
-    <field name="books" colspan="4"/>
+    <label name="latest_book"/>
+    <field name="latest_book"/>
+    <field name="books" colspan="2"/>
+    <field name="genres" colspan="2"/>
 </form>

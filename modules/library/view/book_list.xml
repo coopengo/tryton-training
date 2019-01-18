@@ -3,4 +3,6 @@
     <field name="title"/>
     <field name="author"/>
     <field name="genre"/>
+    <field name="isbn"/>
+    <field name="publishing_date"/>
 </tree>
