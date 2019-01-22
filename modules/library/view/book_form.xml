@@ -24,9 +24,6 @@
             <separator name="summary" colspan="2"/>
             <field name="summary" colspan="2"/>
         </page>
-        <page name="exemplaries">
-            <field name="exemplaries"/>
-        </page>
         <page id="other_data" string="Other informations">
             <label name="page_count"/>
             <field name="page_count"/>
