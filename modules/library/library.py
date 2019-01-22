@@ -243,6 +243,31 @@ class Book(ModelSQL, ModelView):
             if checksum % 10:
                 cls.raise_user_error('invalid_isbn_checksum')
 
+    @classmethod
+    def default_exemplaries(cls):
+        return [{}]
+
+    @fields.depends('editor', 'genre')
+    def on_change_editor(self):
+        if not self.editor:
+            return
+        if self.genre and self.genre not in self.editor.genres:
+            self.genre = None
+        if not self.genre and len(self.editor.genres) == 1:
+            self.genre = self.editor.genres[0]
+
+    @fields.depends('description', 'summary')
+    def on_change_with_description(self):
+        if self.description:
+            return self.description
+        if not self.summary:
+            return ''
+        return self.summary.split('.')[0]
+
+    @fields.depends('exemplaries')
+    def on_change_with_number_of_exemplaries(self):
+        return len(self.exemplaries or [])
+
     def getter_latest_exemplary(self, name):
         latest = None
         for exemplary in self.exemplaries:
@@ -293,3 +318,6 @@ class Exemplary(ModelSQL, ModelView):
     @classmethod
     def default_acquisition_date(cls):
         return datetime.date.today()
+
+    def get_rec_name(self, name):
+        return '%s: %s' % (self.book.rec_name, self.identifier)
