@@ -85,7 +85,7 @@ class Author(ModelSQL, ModelView):
     gender = fields.Selection([('man', 'Man'), ('woman', 'Woman')], 'Gender')
     age = fields.Function(
         fields.Integer('Age', states={'invisible': ~Eval('death_date')}),
-        'getter_age')
+        'on_change_with_age')
     number_of_books = fields.Function(
         fields.Integer('Number of books'),
         'getter_number_of_books')
@@ -98,7 +98,26 @@ class Author(ModelSQL, ModelView):
             states={'invisible': ~Eval('books', False)}),
         'getter_latest_book')
 
-    def getter_age(self, name):
+    @fields.depends('birth_date')
+    def on_change_birth_date(self):
+        if not self.birth_date:
+            self.death_date = None
+
+    @fields.depends('books')
+    def on_change_books(self):
+        if not self.books:
+            self.genres = []
+            self.number_of_books = 0
+            return
+        self.number_of_books, genres = 0, set()
+        for book in self.books:
+            self.number_of_books += 1
+            if book.genre:
+                genres.add(book.genre)
+        self.genres = list(genres)
+
+    @fields.depends('birth_date', 'death_date')
+    def on_change_with_age(self, name=None):
         if not self.birth_date:
             return None
         end_date = self.death_date or datetime.date.today()
@@ -271,5 +290,6 @@ class Exemplary(ModelSQL, ModelView):
                 'The identifier must be unique!'),
             ]
 
-    def get_rec_name(self, name):
-        return '%s: %s' % (self.book.rec_name, self.identifier)
+    @classmethod
+    def default_acquisition_date(cls):
+        return datetime.date.today()
