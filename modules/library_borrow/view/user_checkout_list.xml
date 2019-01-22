@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<tree>
+    <field name="user" expand="1"/>
+    <field name="exemplary" expand="1"/>
+    <field name="date"/>
+    <field name="expected_return_date"/>
+    <field name="return_date"/>
+</tree>

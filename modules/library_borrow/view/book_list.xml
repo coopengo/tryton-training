@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<data>
+    <xpath expr="/tree/field[@name='title']" position="before">
+        <field name="is_available"/>
+    </xpath>
+</data>

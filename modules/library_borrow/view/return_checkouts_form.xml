@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<form>
+    <label name="user"/>
+    <field name="user" colspan="3"/>
+    <label name="date"/>
+    <field name="date" colspan="3"/>
+    <field name="checkouts" colspan="4"/>
+</form>

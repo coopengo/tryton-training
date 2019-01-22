@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<tryton>
+    <data>
+        <!-- ########## -->
+        <!-- # Borrow # -->
+        <!-- ########## -->
+        <record model="ir.action.wizard" id="act_library_user_borrow">
+            <field name="name">Borrow</field>
+            <field name="wiz_name">library.user.borrow</field>
+        </record>
+        <record model="ir.action.keyword" id="act_library_user_borrow_keyword">
+            <field name="keyword">form_action</field>
+            <field name="model">library.user,-1</field>
+            <field name="action" ref="act_library_user_borrow"/>
+        </record>
+        <record model="ir.action.keyword" id="act_library_book_borrow_keyword">
+            <field name="keyword">form_action</field>
+            <field name="model">library.book,-1</field>
+            <field name="action" ref="act_library_user_borrow"/>
+        </record>
+        <!-- ####################### -->
+        <!-- # Borrow Select Books # -->
+        <!-- ####################### -->
+        <record model="ir.ui.view" id="borrow_select_books_view_form">
+            <field name="model">library.user.borrow.select_books</field>
+            <field name="type">form</field>
+            <field name="name">borrow_select_books_form</field>
+        </record>
+        <!-- ########## -->
+        <!-- # Return # -->
+        <!-- ########## -->
+        <record model="ir.action.wizard" id="act_library_user_return">
+            <field name="name">Return</field>
+            <field name="wiz_name">library.user.return</field>
+        </record>
+        <record model="ir.action.keyword" id="act_library_user_return_keyword">
+            <field name="keyword">form_action</field>
+            <field name="model">library.user,-1</field>
+            <field name="action" ref="act_library_user_return"/>
+        </record>
+        <record model="ir.action.keyword" id="act_library_checkout_return_keyword">
+            <field name="keyword">form_action</field>
+            <field name="model">library.user.checkout,-1</field>
+            <field name="action" ref="act_library_user_return"/>
+        </record>
+        <!-- ########################### -->
+        <!-- # Return Select Checkouts # -->
+        <!-- ########################### -->
+        <record model="ir.ui.view" id="return_checkouts_view_form">
+            <field name="model">library.user.return.checkouts</field>
+            <field name="type">form</field>
+            <field name="name">return_checkouts_form</field>
+        </record>
+    </data>
+</tryton>
