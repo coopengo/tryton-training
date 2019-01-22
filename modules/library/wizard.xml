@@ -21,5 +21,33 @@
             <field name="type">form</field>
             <field name="name">create_exemplaries_parameters_form</field>
         </record>
+        <!-- ############## -->
+        <!-- # Fuse Books # -->
+        <!-- ############## -->
+        <record model="ir.action.wizard" id="act_fuse_books">
+            <field name="name">Fuse Books</field>
+            <field name="wiz_name">library.book.fuse</field>
+        </record>
+        <record model="ir.action.keyword" id="act_fuse_books_keyword">
+            <field name="keyword">form_action</field>
+            <field name="model">library.book,-1</field>
+            <field name="action" ref="act_fuse_books"/>
+        </record>
+        <!-- ########################## -->
+        <!-- # Fuse Books Select Main # -->
+        <!-- ########################## -->
+        <record model="ir.ui.view" id="fuse_select_main_view_form">
+            <field name="model">library.book.fuse.select_main</field>
+            <field name="type">form</field>
+            <field name="name">fuse_select_main_form</field>
+        </record>
+        <!-- ###################### -->
+        <!-- # Fuse Books Preview # -->
+        <!-- ###################### -->
+        <record model="ir.ui.view" id="fuse_preview_view_form">
+            <field name="model">library.book.fuse.preview</field>
+            <field name="type">form</field>
+            <field name="name">fuse_preview_form</field>
+        </record>
     </data>
 </tryton>

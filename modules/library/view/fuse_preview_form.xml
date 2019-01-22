@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<form>
+    <field name="final_book" colspan="4" mode="form"/>
+    <label name="number_of_exemplaries"/>
+    <field name="number_of_exemplaries" colspan="3"/>
+</form>
