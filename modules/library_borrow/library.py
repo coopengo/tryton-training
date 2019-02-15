@@ -1,6 +1,7 @@
 import datetime
 
 from sql import Null
+from sql.operators import Concat
 from sql.aggregate import Count, Min
 
 from trytond.pool import PoolMeta, Pool
@@ -206,6 +207,17 @@ class Exemplary(metaclass=PoolMeta):
             ('identifier',) + tuple(clause[1:]),
             ('book.title',) + tuple(clause[1:]),
             ]
+
+    @classmethod
+    def order_rec_name(cls, tables):
+        exemplary, _ = tables[None]
+        book = tables.get('book')
+
+        if book is None:
+            book = Pool().get('library.book').__table__()
+            tables['book'] = {None: (book, book.id == exemplary.book)}
+
+        return [Concat(book.title, exemplary.identifier)]
 
     @classmethod
     def search_is_available(cls, name, clause):
