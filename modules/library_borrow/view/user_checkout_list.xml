@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<tree>
+    <field name="user"/>
+    <field name="exemplary"/>
+    <field name="date"/>
+    <field name="expected_return_date"/>
+    <field name="return_date"/>
+</tree>
+
+
+
+
+ 

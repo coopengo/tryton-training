@@ -1,0 +1,13 @@
+Metadata-Version: 1.2
+Name: trytond-training-override
+Version: 5.0.0
+Summary: Training module for Tryton
+Home-page: http://www.tryton.org/
+Author: Tryton
+Author-email: issue_tracker@tryton.org
+License: GPL-3
+Download-URL: http://downloads.tryton.org/5.0/
+Description: UNKNOWN
+Keywords: tryton training library
+Platform: any
+Requires-Python: >=3.4

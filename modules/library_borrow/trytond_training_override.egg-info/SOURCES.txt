@@ -1,0 +1,16 @@
+setup.py
+./__init__.py
+./library.py
+./library.xml
+./tryton.cfg
+./view/user_checkout_form.xml
+./view/user_checkout_list.xml
+./view/user_form.xml
+./view/user_list.xml
+trytond_training_override.egg-info/PKG-INFO
+trytond_training_override.egg-info/SOURCES.txt
+trytond_training_override.egg-info/dependency_links.txt
+trytond_training_override.egg-info/entry_points.txt
+trytond_training_override.egg-info/not-zip-safe
+trytond_training_override.egg-info/requires.txt
+trytond_training_override.egg-info/top_level.txt
