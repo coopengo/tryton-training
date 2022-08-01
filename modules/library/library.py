@@ -246,9 +246,9 @@ class Book(ModelSQL, ModelView):
             if checksum % 10:
                 cls.raise_user_error('invalid_isbn_checksum')
 
-    @classmethod
-    def default_exemplaries(cls):
-        return [{}]
+    #@classmethod
+    #def default_exemplaries(cls):
+        #return [{}]
 
     @fields.depends('editor', 'genre')
     def on_change_editor(self):
