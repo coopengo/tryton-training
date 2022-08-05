@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<form>
+    <label name="name" colspan="1"/>
+    <field name="name" colspan="3"/>
+    <label name="number_of_shelves" colspan="1"/>
+    <field name="number_of_shelves" colspan="3"/>
+    <field name="shelves" colspan="4"/>
+    <button string="Create shelves" name="create_shelves" icon="tryton-new" colspan="4"/>
+</form>

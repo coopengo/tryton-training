@@ -125,8 +125,8 @@ class Return(Wizard):
                 Transaction().context.get('active_ids'))
             if len({x.user for x in checkouts}) != 1:
                 self.raise_user_error('multiple_users')
-            if any(x.is_available for x in checkouts):
-                self.raise_user_error('available')
+            # if any(x.is_available for x in checkouts):
+            #     self.raise_user_error('available')
             user = checkouts[0].user.id
         return {
             'user': user,

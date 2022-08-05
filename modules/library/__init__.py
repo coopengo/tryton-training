@@ -1,7 +1,7 @@
 from trytond.pool import Pool
 
-import library
-import wizard
+from . import library
+from . import wizard
 
 
 def register():

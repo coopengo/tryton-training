@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<tryton>
+    <data>
+        <!-- ###################### -->
+        <!-- # Create Shelves # -->
+        <!-- ###################### -->
+        <record model="ir.action.wizard" id="act_create_shelves">
+            <field name="name">Create Shelves</field>
+            <field name="wiz_name">library.room.create_shelves</field>
+        </record>
+        <record model="ir.action.keyword" id="act_create_shelves_keyword">
+            <field name="keyword">form_action</field>
+            <field name="model">library.room,-1</field>
+            <field name="action" ref="act_create_shelves"/>
+        </record>
+        <!-- ################################# -->
+        <!-- # Create Shelves Parameters # -->
+        <!-- ################################# -->
+        <record model="ir.ui.view" id="create_shelves_parameters_view_form">
+            <field name="model">library.room.create_shelves.parameters</field>
+            <field name="type">form</field>
+            <field name="name">create_shelves_parameters_form</field>
+        </record>
+        <!-- ################################# -->
+        <!-- # Create Exemplaries Parameters # -->
+        <!-- ################################# -->
+        <record model="ir.action.wizard" id="act_create_exemplaries">
+            <field name="name">Create Exemplaries</field>
+            <field name="wiz_name">library.book.create_exemplaries</field>
+        </record>
+        <record model="ir.ui.view" id="create_exemplaries_parameters_view_form">
+            <field name="model">library.book.create_exemplaries.parameters</field>
+            <field name="inherit" ref="library.create_exemplaries_parameters_view_form"/>
+            <field name="name">create_exemplaries_parameters_form</field>
+        </record>
+        <menuitem parent="library.menu_library" sequence="80" action="act_create_exemplaries" id="menu_create_exemplaries"/>
+        <!-- ################################# -->
+        <!-- # Set Location # -->
+        <!-- ################################# -->
+        <record model="ir.ui.view" id="set_location_view_form">
+            <field name="model">library.book.create_exemplaries.set_location</field>
+            <field name="type">form</field>
+            <field name="name">set_location_form</field>
+        </record>
+        <!-- ################### -->
+        <!-- # Return to Shelf # -->
+        <!-- ################### -->
+        <record model="ir.action.wizard" id="act_return_to_shelf">
+            <field name="name">Return to Shelf</field>
+            <field name="wiz_name">library.book.exemplary.return_to_shelf</field>
+        </record>
+        <record model="ir.action.keyword" id="act_return_to_shelf_keyword">
+            <field name="keyword">form_action</field>
+            <field name="model">library.book.exemplary,-1</field>
+            <field name="action" ref="act_return_to_shelf"/>
+        </record>
+        <!-- ######################################## -->
+        <!-- # Return to Shelf Selected Exemplaries # -->
+        <!-- #########################################-->
+        <record model="ir.ui.view" id="return_to_shelf_select_exemplaries_view_form">
+            <field name="model">library.book.exemplary.return_to_shelf.select_exemplaries</field>
+            <field name="type">form</field>
+            <field name="name">return_to_shelf_selected_exemplaries_form</field>
+        </record>
+    </data>
+</tryton>

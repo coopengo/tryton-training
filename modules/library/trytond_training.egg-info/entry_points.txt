@@ -1,0 +1,4 @@
+
+    [trytond.modules]
+    library = trytond.modules.library
+    

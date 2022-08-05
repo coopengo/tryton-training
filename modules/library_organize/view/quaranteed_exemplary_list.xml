@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<tree>
+    <field name="rec_name" expand="1"/>
+    <field name="quarantine_on" expand="1"/>
+    <field name="quarantine_off" expand="1"/>
+</tree>

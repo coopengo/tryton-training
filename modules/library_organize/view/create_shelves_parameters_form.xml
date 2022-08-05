@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<form>
+    <label name="room"/>
+    <field name="room" colspan="3"/>
+    <label name="number_of_shelves"/>
+    <field name="number_of_shelves"/>
+    <field name="shelves" invisible="1"/>
+</form>
