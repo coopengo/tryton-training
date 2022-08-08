@@ -1,5 +1,5 @@
 import datetime
-
+import json
 from trytond.pool import Pool, PoolMeta
 from trytond.pyson import Eval, PYSONEncoder, Bool, Equal, Date, And
 from trytond.transaction import Transaction
@@ -83,7 +83,8 @@ class CreateExemplaries(metaclass=PoolMeta):
     
     set_location = StateView('library.book.create_exemplaries.set_location',
         'library_organize.set_location_view_form', [
-            Button('Cancel', 'delete_exemplaries_creation', 'tryton-cancel'),
+            Button('Cancel', 'end', 'tryton-cancel'),
+            Button('Previous', 'parameters', 'tryton-go-previous'),
             Button('Confirm', 'set_exemplaries_location', 'tryton-go-next',
                 default=True)])
     set_exemplaries_location = StateTransition()
@@ -98,13 +99,16 @@ class CreateExemplaries(metaclass=PoolMeta):
                 })
         
     def default_parameters(self, name):
+        book = None
         if Transaction().context.get('active_model', '') == 'library.book':
-            return super().default_parameters(name)
+            book = Transaction().context.get('active_id')
+    
         return {
             'acquisition_date': datetime.date.today(),
-            'book': None,
+            'book': book,
             'acquisition_price': 0,
             'exemplaries_to_select': [],
+            # 'exemplaries': [],
             }
 
     def transition_create_exemplaries(self):
@@ -112,50 +116,80 @@ class CreateExemplaries(metaclass=PoolMeta):
                 self.parameters.acquisition_date > datetime.date.today()):
             self.raise_user_error('invalid_date')
         ExemplaryDisplayer = Pool().get('library.book.exemplary.displayer')
-        self.to_display = []
-        while len(self.to_display) < self.parameters.number_of_exemplaries:
+        to_display = []
+        while len(to_display) < self.parameters.number_of_exemplaries:
             
             exemplary_displayer = ExemplaryDisplayer()
             exemplary_displayer.book = self.parameters.book
             exemplary_displayer.acquisition_date = self.parameters.acquisition_date
             exemplary_displayer.acquisition_price = self.parameters.acquisition_price
             exemplary_displayer.identifier = self.parameters.identifier_start + str(
-                len(self.to_display) + 1)
+                len(to_display) + 1)
             exemplary_displayer.in_storage = True
-            self.parameters.exemplaries_to_select.append(exemplary_displayer)
-            # self.to_display.append(exemplary_displayer)
-        # self.set_location.exemplaries = to_display
-        
+            exemplary_displayer.room = None
+            exemplary_displayer.shelf = None
+            self.parameters.exemplaries_to_select = list(self.parameters.exemplaries_to_select) + [exemplary_displayer]
+            to_display.append(exemplary_displayer)
+        self.set_location.exemplaries = to_display
         return 'set_location'
     
     
     def default_set_location(self, name):
-        # if self.set_location._default_values:
-        #     return self.set_location._default_values      
+        exemplaries_to_display = []
+        for exemplary in self.parameters.exemplaries_to_select:
+            exemplary_to_display = {}
+            exemplary_to_display['book'] = exemplary.book.id
+            exemplary_to_display['acquisition_date'] = exemplary.acquisition_date
+            exemplary_to_display['acquisition_price'] = exemplary.acquisition_price
+            exemplary_to_display['identifier'] = exemplary.identifier
+            exemplary_to_display['in_storage'] = exemplary.in_storage 
+            exemplary_to_display['room'] = exemplary.room 
+            exemplary_to_display['shelf'] = exemplary.shelf 
+            # self.parameters.book = exemplary.book.id
+            # self.parameters.acquisition_date = exemplary.acquisition_date
+            # self.parameters.acquisition_price = exemplary.acquisition_price
+            # self.parameters.identifier = exemplary.identifier
+            # self.parameters.in_storage = exemplary.in_storage
+            # self.parameters.room = exemplary.room
+            # self.parameters.shelf = exemplary.shelf
+            exemplaries_to_display.append(exemplary_to_display)
+        # self.raise_user_error('%s' %str(exemplaries_to_display))
         return {
-            'exemplaries': self.parameters.exemplaries_to_select,
+            'exemplaries': [x for x in exemplaries_to_display],
             }
         
     
     def transition_set_exemplaries_location(self):
+        
         Exemplary = Pool().get('library.book.exemplary')
-        to_locate = []
         to_store = []
-        for exemplary in self.set_location.exemplaries:
+        to_create = []
+        
+        for exemplary_parameters in self.set_location.exemplaries:
+            exemplary = Exemplary()
+            import rpdb; rpdb.set_trace()
+            exemplary.book = exemplary_parameters.book
+            exemplary.acquisition_date = exemplary_parameters.acquisition_date
+            exemplary.acquisition_price = exemplary_parameters.acquisition_price
+            exemplary.identifier = exemplary_parameters.identifier
+            exemplary.in_storage = exemplary_parameters.in_storage
+            exemplary.room = exemplary_parameters.room
+            exemplary.shelf = exemplary_parameters.shelf
             if exemplary.in_storage:
                 to_store.append(exemplary)
-            to_locate.append(exemplary)
+            to_create.append(exemplary)
         if len(to_store) != self.parameters.number_exemplaries_to_store:
             self.raise_user_error('invalid_storage_quantity')
-        Exemplary.save(to_locate)
-        self.parameters.exemplaries = to_locate
+        Exemplary.save(to_create)
+        self.parameters.exemplaries = to_create
         return 'open_exemplaries'
     
     
-    def transition_delete_exemplaries_creation(self):
-        Exemplary = Pool().get('library.book.exemplary')
-        Exemplary.delete(self.parameters.exemplaries)
-        return 'end'   
+    
+    # def transition_delete_exemplaries_creation(self):
+    #     Exemplary = Pool().get('library.book.exemplary')
+    #     Exemplary.delete(self.parameters.exemplaries)
+    #     return 'end'   
     
     def end(self):
         return 'reload'
@@ -167,6 +201,8 @@ class CreateExemplariesParameters(metaclass=PoolMeta):
     
     number_exemplaries_to_store = fields.Integer('Number of exemplaries to store')
     exemplaries_to_select = fields.Many2Many('library.book.exemplary.displayer', None, None, 'Exemplaries')
+    in_storage = fields.Boolean('Is stored', help='If True, the exemplary is '
+            'currently in storage and not available for borrow')
     # from_book = fields.Function(fields.Boolean('Action Launched From Book'), 'getter_from_book') 
    
     # to modify the readonly option for book in order to allow action initialization from menu
@@ -190,6 +226,19 @@ class SetLocation(ModelView):
     'New Exemplaries Location'
     __name__ = 'library.book.create_exemplaries.set_location'
     
+    book = fields.Many2One('library.book', 'Book', readonly=True)
+    number_of_exemplaries = fields.Integer('Number of exemplaries', domain=[('number_of_exemplaries', '>', 0)],
+        help='The number of exemplaries that will be created')
+    identifier = fields.Char('Identifier')
+    acquisition_date = fields.Date('Acquisition Date')
+    acquisition_price = fields.Numeric('Acquisition Price', digits=(16, 2),
+        domain=[('acquisition_price', '>=', 0)],
+        help='The price that was paid per exemplary bought')
+    in_storage = fields.Boolean('Is stored', help='If True, the exemplary is '
+            'currently in storage and not available for borrow')
+    room = fields.Many2One('library.room', 'Room')
+    shelf = fields.Many2One('library.room.shelf', 'Shelf', states={'required': And(Bool(~Eval('in_storage', 'False')), Bool(~Eval('quarantine_on', 'False')), Bool(~Eval('quarantine_off', 'False'))) },
+        depends=['in_storage'])
     exemplaries = fields.Many2Many('library.book.exemplary.displayer', None, None, 'Exemplaries')
     
  

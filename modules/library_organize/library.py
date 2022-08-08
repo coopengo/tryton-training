@@ -27,7 +27,7 @@ class Room(ModelSQL, ModelView):
     __name__ = 'library.room'
 
     shelves = fields.One2Many('library.room.shelf', 'room', 'Shelves')
-    name = fields.Char('Name')
+    name = fields.Char('Name', required=True)
     number_of_shelves = fields.Function(
         fields.Integer('Number of shelves'),
         'getter_number_of_shelves')
@@ -67,9 +67,8 @@ class Shelf(ModelSQL, ModelView):
     _rec_name = 'identifier'
    
     
-    room = fields.Many2One('library.room', 'Room', ondelete='CASCADE')
+    room = fields.Many2One('library.room', 'Room', required=True, ondelete='CASCADE')
     identifier = fields.Char('Identifier')
-    capacity = fields.Integer('Capacity')
     exemplaries = fields.One2Many('library.book.exemplary', 'shelf', 'Exemplaries')
     
     # @classmethod
@@ -202,6 +201,9 @@ class ExemplaryDisplayer(ModelView):
             ('acquisition_price', '>', 0)])
     in_storage = fields.Boolean('Is stored', help='If True, the exemplary is '
             'currently in storage and not available for borrow')
+    room = fields.Many2One('library.room', 'Room')
+    shelf = fields.Many2One('library.room.shelf', 'Shelf', states={'required': And(Bool(~Eval('in_storage', 'False')), Bool(~Eval('quarantine_on', 'False')), Bool(~Eval('quarantine_off', 'False'))) },
+        depends=['in_storage'])
     
     def get_rec_name(self, name):
         return '%s: %s' % (self.book.rec_name, self.identifier)
