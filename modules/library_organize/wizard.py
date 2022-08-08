@@ -104,6 +104,7 @@ class CreateExemplaries(metaclass=PoolMeta):
             'acquisition_date': datetime.date.today(),
             'book': None,
             'acquisition_price': 0,
+            'exemplaries_to_select': [],
             }
 
     def transition_create_exemplaries(self):
@@ -121,19 +122,18 @@ class CreateExemplaries(metaclass=PoolMeta):
             exemplary_displayer.identifier = self.parameters.identifier_start + str(
                 len(self.to_display) + 1)
             exemplary_displayer.in_storage = True
-            self.parameters.exemplaries.append(exemplary_displayer)
+            self.parameters.exemplaries_to_select.append(exemplary_displayer)
             # self.to_display.append(exemplary_displayer)
         # self.set_location.exemplaries = to_display
         
         return 'set_location'
     
- 
+    
     def default_set_location(self, name):
         # if self.set_location._default_values:
         #     return self.set_location._default_values      
-        self.raise_user_error('%s' %str(self.parameters.exemplaries))
         return {
-            'exemplaries': [x.id for x in self.parameters.exemplaries],
+            'exemplaries': self.parameters.exemplaries_to_select,
             }
         
     
@@ -166,6 +166,7 @@ class CreateExemplariesParameters(metaclass=PoolMeta):
     __name__ = 'library.book.create_exemplaries.parameters'
     
     number_exemplaries_to_store = fields.Integer('Number of exemplaries to store')
+    exemplaries_to_select = fields.Many2Many('library.book.exemplary.displayer', None, None, 'Exemplaries')
     # from_book = fields.Function(fields.Boolean('Action Launched From Book'), 'getter_from_book') 
    
     # to modify the readonly option for book in order to allow action initialization from menu
@@ -174,7 +175,7 @@ class CreateExemplariesParameters(metaclass=PoolMeta):
         super().__setup__()
         cls.book.readonly = False
         # cls.book.states = {'required': cls.from_book}
-        cls.exemplaries.model = 'library.book.exemplary.displayer'
+       
     
     # def getter_from_book(self, name):
     #     return True if Transaction().context.get('active_model') == 'library.book' else False
@@ -191,7 +192,7 @@ class SetLocation(ModelView):
     
     exemplaries = fields.Many2Many('library.book.exemplary.displayer', None, None, 'Exemplaries')
     
-
+ 
 class ReturnToShelf(Wizard):
     'Return to Shelf'
     __name__ = 'library.book.exemplary.return_to_shelf'

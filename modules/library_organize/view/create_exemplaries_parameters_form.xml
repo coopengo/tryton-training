@@ -4,5 +4,6 @@
         <separator id="storage_info" string="Storage Info" colspan="4"/>
         <label name="number_exemplaries_to_store" colspan="1"/>
         <field name="number_exemplaries_to_store" colspan="3"/>
+        <field name="exemplaries_to_select" invisible="1"/>
     </xpath>
 </data>
