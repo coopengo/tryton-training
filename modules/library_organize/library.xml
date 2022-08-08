@@ -69,14 +69,24 @@
             <field name="inherit" ref="library.exemplary_view_list" />
             <field name="name">exemplary_list</field>
         </record>
+        <record model="ir.ui.view" id="quaranteed_exemplary_view_list">
+            <field name="model">library.book.exemplary</field>
+            <field name="type">tree</field>
+            <field name="name">quaranteed_exemplary_list</field>
+        </record>
+        <record model="ir.ui.view" id="stored_exemplary_view_list">
+            <field name="model">library.book.exemplary</field>
+            <field name="type">tree</field>
+            <field name="name">stored_exemplary_list</field>
+        </record>
         <record model="ir.action.act_window" id="act_open_stored_exemplaries">
             <field name="name">Storage</field>
             <field name="res_model">library.book.exemplary</field>
-            <field name="domain" eval="[('in_storage', '=', True), ('quarantine_on', '=', False), ('quarantine_off', '=', False)]" pyson="1"/>
+            <field name="domain" eval="[('in_storage', '=', True)]" pyson="1"/>
         </record>
         <record model="ir.action.act_window.view" id="act_open_stored_exemplaries_view_list">
             <field name="sequence" eval="10"/>
-            <field name="view" ref="library.exemplary_view_list"/>
+            <field name="view" ref="library_organize.stored_exemplary_view_list"/>
             <field name="act_window" ref="act_open_stored_exemplaries"/>
         </record>
         <record model="ir.action.act_window.view" id="act_open_stored_exemplaries_view_form">
@@ -85,11 +95,6 @@
             <field name="act_window" ref="act_open_stored_exemplaries"/>
         </record>
         <menuitem parent="library.menu_library" sequence="70" action="act_open_stored_exemplaries" id="menu_open_stored_exemplaries"/>
-        <record model="ir.ui.view" id="quaranteed_exemplary_view_list">
-            <field name="model">library.book.exemplary</field>
-            <field name="type">tree</field>
-            <field name="name">quaranteed_exemplary_list</field>
-        </record>
         <record model="ir.action.act_window" id="act_open_quarantine_area">
             <field name="name">Covid-22</field>
             <field name="res_model">library.book.exemplary</field>
@@ -106,6 +111,33 @@
             <field name="act_window" ref="act_open_quarantine_area"/>
         </record>
         <menuitem parent="library.menu_library" sequence="90" action="act_open_quarantine_area" id="menu_open_quarantine_area"/>
+        <!-- ############# -->
+        <!-- # Exemplary Display # -->
+        <!-- ############# -->
+        <record model="ir.ui.view" id="exemplary_displayer_view_form">
+            <field name="model">library.book.exemplary.displayer</field>
+            <field name="type">form</field>
+            <field name="name">exemplary_displayer_form</field>
+        </record>
+        <record model="ir.ui.view" id="exemplary_displayer_view_list">
+            <field name="model">library.book.exemplary.displayer</field>
+            <field name="type">tree</field>
+            <field name="name">exemplary_displayer_list</field>
+        </record>
+        <record model="ir.action.act_window" id="act_exemplary_displayer">
+            <field name="name">Exemplaries</field>
+            <field name="res_model">library.book.exemplary.displayer</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_exemplary_displayer_view_list">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="exemplary_displayer_view_list"/>
+            <field name="act_window" ref="act_exemplary_displayer"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_exemplary_displayer_displayer_view_form">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="exemplary_displayer_view_form"/>
+            <field name="act_window" ref="act_exemplary_displayer"/>
+        </record>
         <!-- ########### -->
         <!-- # Relates # -->
         <!-- ########### -->

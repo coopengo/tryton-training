@@ -1,7 +1,7 @@
 import datetime
 
 from trytond.pool import Pool, PoolMeta
-from trytond.pyson import Eval, PYSONEncoder, Bool, Equal, Date
+from trytond.pyson import Eval, PYSONEncoder, Bool, Equal, Date, And
 from trytond.transaction import Transaction
 from trytond.model import ModelView, fields
 from trytond.wizard import Wizard, StateView, StateTransition, StateAction
@@ -77,8 +77,6 @@ class CreateShelvesParameters(ModelView):
         'Shelves')
 
 
-
-
 class CreateExemplaries(metaclass=PoolMeta):
     'Organize New Exemplaries'
     __name__ = 'library.book.create_exemplaries'
@@ -96,6 +94,7 @@ class CreateExemplaries(metaclass=PoolMeta):
         super().__setup__()
         cls._error_messages.update({
                 'invalid_storage_quantity': 'Number of exemplaries selected for storage is different than previously indicated',
+                'invalid': 'here',
                 })
         
     def default_parameters(self, name):
@@ -111,27 +110,28 @@ class CreateExemplaries(metaclass=PoolMeta):
         if (self.parameters.acquisition_date and
                 self.parameters.acquisition_date > datetime.date.today()):
             self.raise_user_error('invalid_date')
-        Exemplary = Pool().get('library.book.exemplary')
-        to_create = []
-        while len(to_create) < self.parameters.number_of_exemplaries:
-            exemplary = Exemplary()
-            exemplary.book = self.parameters.book
-            exemplary.acquisition_date = self.parameters.acquisition_date
-            exemplary.acquisition_price = self.parameters.acquisition_price
-            exemplary.identifier = self.parameters.identifier_start + str(
-                len(to_create) + 1)
-            exemplary.in_storage = True
-            to_create.append(exemplary)
-        Exemplary.save(to_create)
-        self.parameters.exemplaries = to_create
+        ExemplaryDisplayer = Pool().get('library.book.exemplary.displayer')
+        self.to_display = []
+        while len(self.to_display) < self.parameters.number_of_exemplaries:
+            
+            exemplary_displayer = ExemplaryDisplayer()
+            exemplary_displayer.book = self.parameters.book
+            exemplary_displayer.acquisition_date = self.parameters.acquisition_date
+            exemplary_displayer.acquisition_price = self.parameters.acquisition_price
+            exemplary_displayer.identifier = self.parameters.identifier_start + str(
+                len(self.to_display) + 1)
+            exemplary_displayer.in_storage = True
+            self.to_display.append(exemplary_displayer)
+        # self.set_location.exemplaries = to_display
+        
         return 'set_location'
-
     
+ 
     def default_set_location(self, name):
-        if self.set_location._default_values:
-            return self.set_location._default_values
+        # if self.set_location._default_values:
+        #     return self.set_location._default_values      
         return {
-            'exemplaries': [x.id for x in self.parameters.exemplaries],
+            'exemplaries': [x.id for x in self.to_display],
             }
         
     
@@ -158,14 +158,14 @@ class CreateExemplaries(metaclass=PoolMeta):
     def end(self):
         return 'reload'
     
-  
+    
 class CreateExemplariesParameters(metaclass=PoolMeta):
     'New Exemplaries Information'
     __name__ = 'library.book.create_exemplaries.parameters'
     
     number_exemplaries_to_store = fields.Integer('Number of exemplaries to store')
     # from_book = fields.Function(fields.Boolean('Action Launched From Book'), 'getter_from_book') 
-    
+   
     # to modify the readonly option for book in order to allow action initialization from menu
     @classmethod
     def __setup__(cls):
@@ -186,7 +186,7 @@ class SetLocation(ModelView):
     'New Exemplaries Location'
     __name__ = 'library.book.create_exemplaries.set_location'
     
-    exemplaries = fields.Many2Many('library.book.exemplary', None, None, 'Exemplary')
+    exemplaries = fields.Many2Many('library.book.exemplary.displayer', None, None, 'Exemplaries')
     
 
 class ReturnToShelf(Wizard):
@@ -209,7 +209,7 @@ class ReturnToShelf(Wizard):
         cls._error_messages.update({
                 'invalid_model': 'This action should be started from an exemplary',
                 'already_available': 'One or more of selected exemplaries is/are already available to borrow',
-                'still_quaranteed': 'One or more of selected exemplaries is/are still in quarantine period', 
+                'still_in_quarantine': 'One or more of selected exemplaries is/are still in quarantine period', 
                 })
 
     def transition_check_availibility(self):
@@ -221,7 +221,7 @@ class ReturnToShelf(Wizard):
             if exemplary.is_available:
                 self.raise_user_error('already_available')
             if exemplary.quarantine_on:
-                self.raise_user_error('still_quaranteed')
+                self.raise_user_error('still_in_quarantine')
         return 'select_exemplaries'
 
     def default_select_exemplaries(self, name):

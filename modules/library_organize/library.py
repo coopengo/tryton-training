@@ -17,9 +17,8 @@ from trytond.pyson import If, Eval, Date, Bool, And
 __all__ = [
     'Room',
     'Shelf',
-    'Book',
     'Exemplary',
-    'Checkout',
+    'ExemplaryDisplayer',
     ]
 
 
@@ -61,6 +60,7 @@ class Room(ModelSQL, ModelView):
     def create_shelves(cls, rooms):
         pass
 
+
 class Shelf(ModelSQL, ModelView):
     'Shelf'
     __name__ = 'library.room.shelf'
@@ -84,11 +84,6 @@ class Shelf(ModelSQL, ModelView):
     def get_rec_name(self, name):
         return '%s: %s' % (self.room.rec_name, self.identifier)
     
-    
-
-class Book(metaclass=PoolMeta):
-    __name__ = 'library.book'
-
 
 class Exemplary(metaclass=PoolMeta):
     __name__ = 'library.book.exemplary'
@@ -108,7 +103,6 @@ class Exemplary(metaclass=PoolMeta):
     quarantine_off = fields.Function(
         fields.Boolean('Quarantine Off', help='The exemplary is located in the quarantine area'),
         'getter_quarantine_off', searcher='search_quarantine_off')
-    
 
 
     # overriden 
@@ -124,6 +118,7 @@ class Exemplary(metaclass=PoolMeta):
             result[exemplary_id] = False
         return result
     
+   
     @classmethod
     def getter_quarantine_on(cls, exemplaries, name):
         checkout = Pool().get('library.user.checkout').__table__()
@@ -180,12 +175,10 @@ class Exemplary(metaclass=PoolMeta):
     def getter_room(self, name):
         if self.shelf:
             return self.shelf.room
-        
-    
+          
     @fields.depends('in_storage')
     def on_change_with_is_available(self):
         return not self.in_storage
-    
     
     @fields.depends('in_storage')
     def on_change_with_shelf(self):
@@ -196,7 +189,22 @@ class Exemplary(metaclass=PoolMeta):
         return None
     
 
+class ExemplaryDisplayer(ModelView):
+    'Exemplary Displayer'
+    __name__ = 'library.book.exemplary.displayer'
+    _rec_name = 'identifier'
     
-class Checkout(ModelSQL, ModelView):
-    'Checkout'
-    __name__ = 'library.user.checkout'
+    book = fields.Many2One('library.book', 'Book')
+    identifier = fields.Char('Identifier')
+    acquisition_date = fields.Date('Acquisition Date')
+    acquisition_price = fields.Numeric('Acquisition Price', digits=(16, 2),
+        domain=['OR', ('acquisition_price', '=', None),
+            ('acquisition_price', '>', 0)])
+    in_storage = fields.Boolean('Is stored', help='If True, the exemplary is '
+            'currently in storage and not available for borrow')
+    
+    def get_rec_name(self, name):
+        return '%s: %s' % (self.book.rec_name, self.identifier)
+    
+  
+

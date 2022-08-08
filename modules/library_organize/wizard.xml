@@ -35,6 +35,14 @@
         </record>
         <menuitem parent="library.menu_library" sequence="80" action="act_create_exemplaries" id="menu_create_exemplaries"/>
         <!-- ################################# -->
+        <!-- # Create Exemplaries Displayer # -->
+        <!-- ################################# -->
+        <record model="ir.ui.view" id="create_exemplaries_displayer_view_list">
+            <field name="model">library.book.exemplary.displayer</field>
+            <field name="type">tree</field>
+            <field name="name">create_exemplaries_displayer_list</field>
+        </record>
+        <!-- ################################# -->
         <!-- # Set Location # -->
         <!-- ################################# -->
         <record model="ir.ui.view" id="set_location_view_form">

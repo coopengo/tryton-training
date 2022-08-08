@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<form>
+    <label name="book"/>
+    <field name="book"/>
+    <label name="identifier"/>
+    <field name="identifier"/>
+    <label name="acquisition_date"/>
+    <field name="acquisition_date"/>
+    <label name="acquisition_price"/>
+    <field name="acquisition_price"/>
+</form>

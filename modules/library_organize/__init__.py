@@ -8,9 +8,8 @@ def register():
     Pool.register(
         library.Room,
         library.Shelf,
-        library.Book,
         library.Exemplary,
-        library.Checkout,
+        library.ExemplaryDisplayer,
         wizard.CreateShelvesParameters,
         wizard.CreateExemplariesParameters,
         wizard.SetLocation,
