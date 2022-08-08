@@ -121,7 +121,8 @@ class CreateExemplaries(metaclass=PoolMeta):
             exemplary_displayer.identifier = self.parameters.identifier_start + str(
                 len(self.to_display) + 1)
             exemplary_displayer.in_storage = True
-            self.to_display.append(exemplary_displayer)
+            self.parameters.exemplaries.append(exemplary_displayer)
+            # self.to_display.append(exemplary_displayer)
         # self.set_location.exemplaries = to_display
         
         return 'set_location'
@@ -130,8 +131,9 @@ class CreateExemplaries(metaclass=PoolMeta):
     def default_set_location(self, name):
         # if self.set_location._default_values:
         #     return self.set_location._default_values      
+        self.raise_user_error('%s' %str(self.parameters.exemplaries))
         return {
-            'exemplaries': [x.id for x in self.to_display],
+            'exemplaries': [x.id for x in self.parameters.exemplaries],
             }
         
     
@@ -172,6 +174,7 @@ class CreateExemplariesParameters(metaclass=PoolMeta):
         super().__setup__()
         cls.book.readonly = False
         # cls.book.states = {'required': cls.from_book}
+        cls.exemplaries.model = 'library.book.exemplary.displayer'
     
     # def getter_from_book(self, name):
     #     return True if Transaction().context.get('active_model') == 'library.book' else False

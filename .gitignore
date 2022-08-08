@@ -1,0 +1,6 @@
+# ignore all .pyc files
+*.pyc
+
+#ignore egg-info
+trytond_training.egg-info/
+trytond_training_override.egg-info/
