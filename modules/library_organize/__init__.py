@@ -20,5 +20,6 @@ def register():
         wizard.CreateShelves,
         wizard.CreateExemplaries,
         wizard.ReturnToShelf,
+        wizard.Borrow,
         module='library_organize', type_='wizard')
   

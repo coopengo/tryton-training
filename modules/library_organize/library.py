@@ -35,12 +35,17 @@ class Room(ModelSQL, ModelView):
     @classmethod
     def __setup__(cls):
         super().__setup__()
-        # t = cls.__table__()
+        t = cls.__table__()
         cls._buttons.update({
                 'create_shelves': {},
                 })
 
-    
+        cls._sql_constraints += [
+            ('name_uniq', Unique(t, t.name),
+                'The room name must be unique!'),
+            ]
+
+  
     @classmethod
     def getter_number_of_shelves(cls, rooms, name):
         result = {x.id: 0 for x in rooms}
@@ -71,14 +76,14 @@ class Shelf(ModelSQL, ModelView):
     identifier = fields.Char('Identifier')
     exemplaries = fields.One2Many('library.book.exemplary', 'shelf', 'Exemplaries')
     
-    # @classmethod
-    # def __setup__(cls):
-    #     super().__setup__()
-    #     t = cls.__table__()
-    #     cls._sql_constraints += [
-    #         ('identifier_uniq', Unique(t, t.identifier),
-    #             'The identifier must be unique!'),
-    #         ]
+    @classmethod
+    def __setup__(cls):
+        super().__setup__()
+        t = cls.__table__()
+        cls._sql_constraints += [
+            ('identifier_uniq', Unique(t, t.identifier),
+                'The identifier must be unique!'),
+            ]
     
     def get_rec_name(self, name):
         return '%s: %s' % (self.room.rec_name, self.identifier)
@@ -87,7 +92,6 @@ class Shelf(ModelSQL, ModelView):
 class Exemplary(metaclass=PoolMeta):
     __name__ = 'library.book.exemplary'
     
-    # room = fields.Function(fields.Many2One('library.room', 'Room'), 'getter_room') 
     room = fields.Many2One('library.room', 'Room')
     shelf = fields.Many2One('library.room.shelf', 'Shelf', states={'required': And(Bool(~Eval('in_storage', 'False')), Bool(~Eval('quarantine_on', 'False')), Bool(~Eval('quarantine_off', 'False'))) },
         depends=['in_storage'])
@@ -102,6 +106,11 @@ class Exemplary(metaclass=PoolMeta):
     quarantine_off = fields.Function(
         fields.Boolean('Quarantine Off', help='The exemplary is located in the quarantine area'),
         'getter_quarantine_off', searcher='search_quarantine_off')
+    
+    return_to_shelf_date = fields.Date('Exposure date')
+    
+    
+    
 
 
     # overriden 
@@ -109,13 +118,32 @@ class Exemplary(metaclass=PoolMeta):
     def getter_is_available(cls, exemplaries, name):
         checkout = Pool().get('library.user.checkout').__table__()
         cursor = Transaction().connection.cursor()
-        result = {x.id: True if (not x.in_storage and not x.quarantine_on and not x.quarantine_off) else False for x in exemplaries}
+        result = {x.id: True if (not x.in_storage and not x.quarantine_on and not x.quarantine_off and x.return_to_shelf_date != None) else False for x in exemplaries}
         cursor.execute(*checkout.select(checkout.exemplary,
                 where=(checkout.return_date == Null)
                 & checkout.exemplary.in_([x.id for x in exemplaries])))
         for exemplary_id, in cursor.fetchall():
             result[exemplary_id] = False
         return result
+    
+    @classmethod
+    def search_is_available(cls, name, clause):
+        _, operator, value = clause
+        if operator == '!=':
+            value = not value
+        pool = Pool()
+        Exemplary = pool.get('library.book.exemplary')
+        checkout = pool.get('library.user.checkout').__table__()
+        exemplaries = Exemplary.search(['AND', ('in_storage', '=', False), ('return_to_shelf_date', '!=', None)])
+        # cls.raise_user_error('%s' %str(exemplaries))
+        exemplary = cls.__table__()
+        query = exemplary.join(checkout, 'LEFT OUTER',
+            condition=(exemplary.id == checkout.exemplary)
+            ).select(exemplary.id,
+            where=(((checkout.return_date != Null) & (checkout.date == Null))) & checkout.exemplary.in_([x.id for x in exemplaries]))
+        return [('id', 'in' if value else 'not in', query)]
+        
+
     
    
     @classmethod
@@ -128,6 +156,7 @@ class Exemplary(metaclass=PoolMeta):
                 & checkout.exemplary.in_([x.id for x in exemplaries])))
         for exemplary_id, in cursor.fetchall():
             result[exemplary_id] = True
+      
         return result
     
     @classmethod
@@ -148,13 +177,15 @@ class Exemplary(metaclass=PoolMeta):
     def getter_quarantine_off(cls, exemplaries, name):
         checkout = Pool().get('library.user.checkout').__table__()
         cursor = Transaction().connection.cursor()
-        result = {x.id: False for x in exemplaries}
+        result = {x.id: True if (x.return_to_shelf_date == None and not x.in_storage and not x.quarantine_on) else False for x in exemplaries}
         cursor.execute(*checkout.select(checkout.exemplary,
-                where=((checkout.return_date != Null) & (checkout.return_date + datetime.timedelta(days=7) < datetime.datetime.today()))
+                where=((checkout.return_date == Null) | (checkout.return_date + datetime.timedelta(days=7) > datetime.datetime.today()))
                 & checkout.exemplary.in_([x.id for x in exemplaries])))
         for exemplary_id, in cursor.fetchall():
-            result[exemplary_id] = True
+            
+            result[exemplary_id] = False
         return result
+    
     
     @classmethod
     def search_quarantine_off(cls, name, clause):
@@ -167,9 +198,10 @@ class Exemplary(metaclass=PoolMeta):
         query = exemplary.join(checkout, 'LEFT OUTER',
             condition=(exemplary.id == checkout.exemplary)
             ).select(exemplary.id,
-            where=((checkout.return_date != Null) & (checkout.return_date + datetime.timedelta(days=7) < datetime.datetime.today())))
+            where=(((checkout.return_date != Null) & (checkout.return_date + datetime.timedelta(days=7) < datetime.datetime.today()))
+                   ))
         return [('id', 'in' if value else 'not in', query)]
-                                    
+       
 
     def getter_room(self, name):
         if self.shelf:
@@ -186,7 +218,7 @@ class Exemplary(metaclass=PoolMeta):
     @fields.depends('in_storage')
     def on_change_with_room(self):
         return None
-    
+
 
 class ExemplaryDisplayer(ModelView):
     'Exemplary Displayer'

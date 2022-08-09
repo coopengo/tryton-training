@@ -15,6 +15,7 @@ __all__ = [
     'SetLocation',
     'ReturnToShelf',
     'ReturnToShelfSelectedExemplaries',
+    'Borrow',
     ]
 
 
@@ -51,8 +52,8 @@ class CreateShelves(Wizard):
         while len(to_create) < self.parameters.number_of_shelves:
             shelf = Shelf()
             shelf.room = self.parameters.room
-            # shelf.identifier = self.parameters.identifier_start + str(len(to_create) + 1)
-            shelf.identifier = str(len(to_create) + 1)
+            shelf.identifier = self.parameters.identifier_start + str(len(to_create) + 1)
+            # shelf.identifier = str(len(to_create) + 1)
             to_create.append(shelf)
         Shelf.save(to_create)
         self.parameters.shelves = to_create
@@ -71,8 +72,8 @@ class CreateShelvesParameters(ModelView):
     room = fields.Many2One('library.room', 'Room', readonly=True)
     number_of_shelves = fields.Integer('Number of shelves', domain=[('number_of_shelves', '>=', 0)],
         help='The number of shelves that will be created for this room')
-    # identifier_start = fields.Char('Identifier start',
-        # help='The starting point for shelves identifiers')
+    identifier_start = fields.Char('Identifier start',
+        help='The starting point for shelves identifiers')
     shelves = fields.Many2Many('library.room.shelf', None, None,
         'Shelves')
 
@@ -95,10 +96,12 @@ class CreateExemplaries(metaclass=PoolMeta):
         super().__setup__()
         cls._error_messages.update({
                 'invalid_storage_quantity': 'Number of exemplaries selected for storage is different than previously indicated',
-                'invalid': 'here',
+                'invalid_room': 'The chosen shelf does not belong to the right room',
                 })
         
     def default_parameters(self, name):
+        if self.parameters._default_values:
+            return self.parameters._default_values
         book = None
         if Transaction().context.get('active_model', '') == 'library.book':
             book = Transaction().context.get('active_id')
@@ -118,7 +121,6 @@ class CreateExemplaries(metaclass=PoolMeta):
         ExemplaryDisplayer = Pool().get('library.book.exemplary.displayer')
         to_display = []
         while len(to_display) < self.parameters.number_of_exemplaries:
-            
             exemplary_displayer = ExemplaryDisplayer()
             exemplary_displayer.book = self.parameters.book
             exemplary_displayer.acquisition_date = self.parameters.acquisition_date
@@ -130,7 +132,7 @@ class CreateExemplaries(metaclass=PoolMeta):
             exemplary_displayer.shelf = None
             self.parameters.exemplaries_to_select = list(self.parameters.exemplaries_to_select) + [exemplary_displayer]
             to_display.append(exemplary_displayer)
-        self.set_location.exemplaries = to_display
+        # self.set_location.exemplaries = to_display
         return 'set_location'
     
     
@@ -145,15 +147,7 @@ class CreateExemplaries(metaclass=PoolMeta):
             exemplary_to_display['in_storage'] = exemplary.in_storage 
             exemplary_to_display['room'] = exemplary.room 
             exemplary_to_display['shelf'] = exemplary.shelf 
-            # self.parameters.book = exemplary.book.id
-            # self.parameters.acquisition_date = exemplary.acquisition_date
-            # self.parameters.acquisition_price = exemplary.acquisition_price
-            # self.parameters.identifier = exemplary.identifier
-            # self.parameters.in_storage = exemplary.in_storage
-            # self.parameters.room = exemplary.room
-            # self.parameters.shelf = exemplary.shelf
             exemplaries_to_display.append(exemplary_to_display)
-        # self.raise_user_error('%s' %str(exemplaries_to_display))
         return {
             'exemplaries': [x for x in exemplaries_to_display],
             }
@@ -167,7 +161,7 @@ class CreateExemplaries(metaclass=PoolMeta):
         
         for exemplary_parameters in self.set_location.exemplaries:
             exemplary = Exemplary()
-            import rpdb; rpdb.set_trace()
+            # import rpdb; rpdb.set_trace()
             exemplary.book = exemplary_parameters.book
             exemplary.acquisition_date = exemplary_parameters.acquisition_date
             exemplary.acquisition_price = exemplary_parameters.acquisition_price
@@ -175,8 +169,11 @@ class CreateExemplaries(metaclass=PoolMeta):
             exemplary.in_storage = exemplary_parameters.in_storage
             exemplary.room = exemplary_parameters.room
             exemplary.shelf = exemplary_parameters.shelf
+            exemplary.retun_to_shelf_date = exemplary_parameters.acquisition_date
             if exemplary.in_storage:
                 to_store.append(exemplary)
+            else:
+                exemplary.return_to_shelf_date = datetime.date.today()
             to_create.append(exemplary)
         if len(to_store) != self.parameters.number_exemplaries_to_store:
             self.raise_user_error('invalid_storage_quantity')
@@ -200,7 +197,7 @@ class CreateExemplariesParameters(metaclass=PoolMeta):
     __name__ = 'library.book.create_exemplaries.parameters'
     
     number_exemplaries_to_store = fields.Integer('Number of exemplaries to store')
-    exemplaries_to_select = fields.Many2Many('library.book.exemplary.displayer', None, None, 'Exemplaries')
+    exemplaries_to_select = fields.One2Many('library.book.exemplary.displayer', None, 'Exemplaries')
     in_storage = fields.Boolean('Is stored', help='If True, the exemplary is '
             'currently in storage and not available for borrow')
     # from_book = fields.Function(fields.Boolean('Action Launched From Book'), 'getter_from_book') 
@@ -225,21 +222,7 @@ class CreateExemplariesParameters(metaclass=PoolMeta):
 class SetLocation(ModelView):
     'New Exemplaries Location'
     __name__ = 'library.book.create_exemplaries.set_location'
-    
-    book = fields.Many2One('library.book', 'Book', readonly=True)
-    number_of_exemplaries = fields.Integer('Number of exemplaries', domain=[('number_of_exemplaries', '>', 0)],
-        help='The number of exemplaries that will be created')
-    identifier = fields.Char('Identifier')
-    acquisition_date = fields.Date('Acquisition Date')
-    acquisition_price = fields.Numeric('Acquisition Price', digits=(16, 2),
-        domain=[('acquisition_price', '>=', 0)],
-        help='The price that was paid per exemplary bought')
-    in_storage = fields.Boolean('Is stored', help='If True, the exemplary is '
-            'currently in storage and not available for borrow')
-    room = fields.Many2One('library.room', 'Room')
-    shelf = fields.Many2One('library.room.shelf', 'Shelf', states={'required': And(Bool(~Eval('in_storage', 'False')), Bool(~Eval('quarantine_on', 'False')), Bool(~Eval('quarantine_off', 'False'))) },
-        depends=['in_storage'])
-    exemplaries = fields.Many2Many('library.book.exemplary.displayer', None, None, 'Exemplaries')
+    exemplaries = fields.One2Many('library.book.exemplary.displayer', 'exemplary', 'Exemplaries')
     
  
 class ReturnToShelf(Wizard):
@@ -282,14 +265,14 @@ class ReturnToShelf(Wizard):
         exemplaries = Exemplary.browse(Transaction().context.get('active_ids'))
         return {
             'selected_exemplaries': [x.id for x in exemplaries],
+            'return_to_shelf_date': datetime.datetime.today(),
             }
     
     def transition_return_to_shelf(self):
         Exemplary = Pool().get('library.book.exemplary')
-        exemplaries = Exemplary.browse(Transaction().context.get('active_ids'))
-        Exemplary.write(list(exemplaries), {
-            'quarantine_off': False
-        })     
+        Exemplary.write(list(self.select_exemplaries.selected_exemplaries), {
+                'return_to_shelf_date': self.select_exemplaries.return_to_shelf_date})
+
         return 'end'
     
     def end(self):
@@ -302,4 +285,30 @@ class ReturnToShelfSelectedExemplaries(ModelView):
 
     selected_exemplaries = fields.Many2Many('library.book.exemplary', None, None,
         'Selected exemplaries')
+    return_to_shelf_date = fields.Date('Return to shelf date')
     
+
+class Borrow(metaclass=PoolMeta):
+    'Borrow books'
+    __name__ = 'library.user.borrow'
+
+    def transition_borrow(self):
+        Checkout = Pool().get('library.user.checkout')
+        Exemplary = Pool().get('library.book.exemplary')
+        exemplaries = self.select_books.exemplaries
+        user = self.select_books.user
+        checkouts = []
+        for exemplary in exemplaries:
+            if not exemplary.is_available:
+                self.raise_user_error('unavailable', {
+                        'exemplary': exemplary.rec_name})
+            checkouts.append(Checkout(
+                    user=user, date=self.select_books.date,
+                    exemplary=exemplary, return_date=None))
+        Checkout.save(checkouts)
+        Exemplary.write(list(exemplaries), {
+                'return_to_shelf_date': None})
+       
+        self.select_books.checkouts = checkouts
+        return 'checkouts'
+  

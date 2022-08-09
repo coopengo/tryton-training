@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<form>
+    <label name="book"/>
+    <field name="book"/>
+    <label name="identifier"/>
+    <field name="identifier"/>
+    <label name="acquisition_date"/>
+    <field name="acquisition_date"/>
+    <label name="acquisition_price"/>
+    <field name="acquisition_price"/>
+    <separator id="quarantine_info" string="Quarantine Info" colspan="4"/>
+    <label name="quarantine_on"/>
+    <field name="quarantine_on"/>
+    <label name="quarantine_off"/>
+    <field name="quarantine_off"/>
+</form>

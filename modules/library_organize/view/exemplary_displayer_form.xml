@@ -4,8 +4,10 @@
     <field name="book"/>
     <label name="identifier"/>
     <field name="identifier"/>
-    <label name="acquisition_date"/>
-    <field name="acquisition_date"/>
-    <label name="acquisition_price"/>
-    <field name="acquisition_price"/>
+    <label name="in_storage"/>
+    <field name="in_storage"/>
+    <label name="room"/>
+    <field name="room"/>
+    <label name="shelf"/>
+    <field name="shelf"/>
 </form>

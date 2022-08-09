@@ -4,5 +4,7 @@
     <field name="room" colspan="3"/>
     <label name="number_of_shelves"/>
     <field name="number_of_shelves"/>
+    <label name="identifier_start"/>
+    <field name="identifier_start"/>
     <field name="shelves" invisible="1"/>
 </form>

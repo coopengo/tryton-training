@@ -1,4 +1,6 @@
 <?xml version="1.0"?>
 <form>
-    <field name="selected_exemplaries"/>
+    <label name="return_to_shelf_date" colspan="1"/>
+    <field name="return_to_shelf_date" colspan="3"/>
+    <field name="selected_exemplaries" colspan="4"/>
 </form>
