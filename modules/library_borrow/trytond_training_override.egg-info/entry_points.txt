@@ -1,4 +1,0 @@
-
-    [trytond.modules]
-    library_borrow = trytond.modules.library_borrow
-    

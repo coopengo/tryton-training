@@ -1,3 +1,0 @@
-python-sql>=0.9
-trytond<5.1,>=5.0
-trytond_training<5.1,>=5.0
