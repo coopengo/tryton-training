@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <form>
-    <label name="room" colspan="1"/>
-    <field name="room" colspan="3"/>
-    <label name="identifier" colspan="1"/>
-    <field name="identifier" colspan="3"/>
-    <field name="exemplaries" colspan="4"/>
+    <label name="room" colspan="1" />
+    <field name="room" colspan="3" />
+    <label name="identifier" colspan="1" />
+    <field name="identifier" colspan="3" />
+    <field name="exemplaries" colspan="4" />
 </form>

@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
 <data>
     <xpath expr="/form/field[@name='is_available']" position="after">
-        <label name="in_storage"/>
-        <field name="in_storage"/>
-        <label name="quarantine_on"/>
-        <field name="quarantine_on"/>
-        <label name="quarantine_off"/>
-        <field name="quarantine_off"/>
-        <separator id="location" string="Location" colspan="4"/>
-        <label name="room"/>
-        <field name="room"/>
-        <label name="shelf"/>
-        <field name="shelf"/>
+        <label name="in_storage" />
+        <field name="in_storage" />
+        <label name="quarantine_on" />
+        <field name="quarantine_on" />
+        <label name="quarantine_off" />
+        <field name="quarantine_off" />
+        <separator id="location" string="Location" colspan="4" />
+        <label name="room" />
+        <field name="room" />
+        <label name="shelf" />
+        <field name="shelf" />
     </xpath>
 </data>

@@ -1,4 +1,4 @@
 <?xml version="1.0"?>
 <form>
-    <field name="exemplaries"/>
+    <field name="exemplaries" />
 </form>

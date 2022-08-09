@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
 <tree>
-    <field name="name" expand="1"/>
-    <field name="number_of_shelves" expand="1"/>
+    <field name="name" expand="1" />
+    <field name="number_of_shelves" expand="1" />
 </tree>

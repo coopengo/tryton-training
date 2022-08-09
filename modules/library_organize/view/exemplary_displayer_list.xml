@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <tree editable="1">
-    <field name="book" expand="1"/>
-    <field name="identifier" expand="1"/>
-    <field name="in_storage" expand="1"/>
-    <field name="room" expand="1"/>
-    <field name="shelf" expand="1"/>
+    <field name="book" expand="1" />
+    <field name="identifier" expand="1" />
+    <field name="in_storage" expand="1" />
+    <field name="room" expand="1" />
+    <field name="shelf" expand="1" />
 </tree>
