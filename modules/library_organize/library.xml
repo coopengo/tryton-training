@@ -104,23 +104,24 @@
         <record model="ir.action.act_window" id="act_open_quarantine_area">
             <field name="name">Covid-22</field>
             <field name="res_model">library.book.exemplary</field>
-            <field name="domain" eval="['OR', ('quarantine_on', '=', True), ('quarantine_off', '=', True)]" pyson="1" />
+            <field name="domain" eval="[('return_to_shelf_date', '=', None)]" pyson="1" />
         </record>
         <record model="ir.action.act_window.domain" id="act_open_quarantine_area_domain_all">
             <field name="name">All</field>
             <field name="sequence" eval="10" />
+            <field name="domain" eval="[('return_to_shelf_date', '=', None)]" pyson="1" />
             <field name="act_window" ref="act_open_quarantine_area" />
         </record>
         <record model="ir.action.act_window.domain" id="act_open_quarantine_area_domain_quarantine_on">
             <field name="name">Still in quarantine</field>
             <field name="sequence" eval="20" />
-            <field name="domain" eval="[('quarantine_on', '=', True)]" pyson="1" />
+            <field name="domain" eval="[('quarantine_on', '=', True), ('quarantine_off', '=', False)]" pyson="1" />
             <field name="act_window" ref="act_open_quarantine_area" />
         </record>
         <record model="ir.action.act_window.domain" id="act_open_quarantine_area_domain_quarantine_off">
             <field name="name">Available for exposure</field>
             <field name="sequence" eval="30" />
-            <field name="domain" eval="[('quarantine_off', '=', True)]" pyson="1" />
+            <field name="domain" eval="[('quarantine_off', '=', True), ('quarantine_on', '=', False)]" pyson="1" />
             <field name="act_window" ref="act_open_quarantine_area" />
         </record>
         <record model="ir.action.act_window.view" id="act_open_quarantine_area_view_list">
@@ -134,33 +135,6 @@
             <field name="act_window" ref="act_open_quarantine_area" />
         </record>
         <menuitem parent="library.menu_library" sequence="90" action="act_open_quarantine_area" id="menu_open_quarantine_area" />
-        <!-- ##################### -->
-        <!-- # Exemplary Display # -->
-        <!-- ##################### -->
-        <record model="ir.ui.view" id="exemplary_displayer_view_form">
-            <field name="model">library.book.exemplary.displayer</field>
-            <field name="type">form</field>
-            <field name="name">exemplary_displayer_form</field>
-        </record>
-        <record model="ir.ui.view" id="exemplary_displayer_view_list">
-            <field name="model">library.book.exemplary.displayer</field>
-            <field name="type">tree</field>
-            <field name="name">exemplary_displayer_list</field>
-        </record>
-        <record model="ir.action.act_window" id="act_exemplary_displayer">
-            <field name="name">Exemplaries</field>
-            <field name="res_model">library.book.exemplary.displayer</field>
-        </record>
-        <record model="ir.action.act_window.view" id="act_exemplary_displayer_view_list">
-            <field name="sequence" eval="10" />
-            <field name="view" ref="exemplary_displayer_view_list" />
-            <field name="act_window" ref="act_exemplary_displayer" />
-        </record>
-        <record model="ir.action.act_window.view" id="act_exemplary_displayer_displayer_view_form">
-            <field name="sequence" eval="20" />
-            <field name="view" ref="exemplary_displayer_view_form" />
-            <field name="act_window" ref="act_exemplary_displayer" />
-        </record>
         <!-- ########### -->
         <!-- # Relates # -->
         <!-- ########### -->

@@ -1,4 +1,5 @@
 import datetime
+from tabnanny import check
 
 from sql import Null
 from sql.operators import Concat
@@ -16,7 +17,7 @@ __all__ = [
     'Checkout',
     'Book',
     'Exemplary',
-    ]
+]
 
 
 class User(ModelSQL, ModelView):
@@ -26,20 +27,20 @@ class User(ModelSQL, ModelView):
     checkouts = fields.One2Many('library.user.checkout', 'user', 'Checkouts')
     name = fields.Char('Name', required=True)
     registration_date = fields.Date('Registration Date', domain=[
-            If(~Eval('registration_date'), [],
-                [('registration_date', '<=', Date())])],
+        If(~Eval('registration_date'), [],
+           [('registration_date', '<=', Date())])],
         help='The date at which the user registered in the library')
     checkedout_books = fields.Function(
         fields.Integer('Checked-out books', help='The number of books a user '
-            'has currently checked out'),
+                       'has currently checked out'),
         'getter_checkedout_books')
     late_checkedout_books = fields.Function(
         fields.Integer('Late checked-out books', help='The number of books a '
-            'user is late returning'),
+                       'user is late returning'),
         'getter_checkedout_books')
     expected_return_date = fields.Function(
         fields.Date('Expected return date', help='The date at which the user '
-            'is (or was) expected to return his books'),
+                    'is (or was) expected to return his books'),
         'getter_checkedout_books', searcher='search_expected_return_date')
 
     @classmethod
@@ -52,8 +53,9 @@ class User(ModelSQL, ModelView):
         result = {x.id: default_value for x in users}
         column, where = cls._get_checkout_column(checkout, name)
         cursor.execute(*checkout.select(checkout.user, column,
-                where=where & checkout.user.in_([x.id for x in users]),
-                group_by=[checkout.user]))
+                                        where=where & checkout.user.in_(
+                                            [x.id for x in users]),
+                                        group_by=[checkout.user]))
         for user_id, value in cursor.fetchall():
             result[user_id] = value
             if name == 'expected_return_date' and value:
@@ -87,17 +89,17 @@ class User(ModelSQL, ModelView):
             value = value + datetime.timedelta(days=-20)
         if isinstance(value, (list, tuple)):
             value = [(x + datetime.timedelta(days=-20) if x else x)
-                for x in value]
+                     for x in value]
         Operator = SQL_OPERATORS[operator]
 
         query_table = user.join(checkout, 'LEFT OUTER',
-            condition=checkout.user == user.id)
+                                condition=checkout.user == user.id)
 
         query = query_table.select(user.id,
-            where=(checkout.return_date == Null) |
-            (checkout.id == Null),
-            group_by=user.id,
-            having=Operator(Min(checkout.date), value))
+                                   where=(checkout.return_date == Null) |
+                                   (checkout.id == Null),
+                                   group_by=user.id,
+                                   having=Operator(Min(checkout.date), value))
         return [('id', 'in', query)]
 
 
@@ -106,19 +108,19 @@ class Checkout(ModelSQL, ModelView):
     __name__ = 'library.user.checkout'
 
     user = fields.Many2One('library.user', 'User', required=True,
-        ondelete='CASCADE', select=True)
+                           ondelete='CASCADE', select=True)
     exemplary = fields.Many2One('library.book.exemplary', 'Exemplary',
-        required=True, ondelete='CASCADE', select=True)
+                                required=True, ondelete='CASCADE', select=True)
     date = fields.Date('Date', required=True, domain=[
-            ('date', '<=', Date())])
+        ('date', '<=', Date())])
     return_date = fields.Date('Return Date', domain=[
-            If(~Eval('return_date'), [],
-                [('return_date', '<=', Date()),
-                    ('return_date', '>=', Eval('date'))])],
+        If(~Eval('return_date'), [],
+           [('return_date', '<=', Date()),
+            ('return_date', '>=', Eval('date'))])],
         depends=['date'])
     expected_return_date = fields.Function(
         fields.Date('Expected return date', help='The date at which the  '
-            'exemplary is supposed to be returned'),
+                    'exemplary is supposed to be returned'),
         'getter_expected_return_date', searcher='search_expected_return_date')
 
     def getter_expected_return_date(self, name):
@@ -131,7 +133,7 @@ class Checkout(ModelSQL, ModelView):
             value = value + datetime.timedelta(days=-20)
         if isinstance(value, (list, tuple)):
             value = [(x + datetime.timedelta(days=-20) if x else x)
-                for x in value]
+                     for x in value]
         return [('date', operator, value)]
 
 
@@ -140,7 +142,7 @@ class Book(metaclass=PoolMeta):
 
     is_available = fields.Function(
         fields.Boolean('Is available', help='If True, at least an exemplary '
-            'of this book is currently available for borrowing'),
+                       'of this book is currently available for borrowing'),
         'getter_is_available', searcher='search_is_available')
 
     @classmethod
@@ -152,11 +154,11 @@ class Book(metaclass=PoolMeta):
         result = {x.id: False for x in books}
         cursor = Transaction().connection.cursor()
         cursor.execute(*book.join(exemplary,
-                condition=(exemplary.book == book.id)
-                ).join(checkout, 'LEFT OUTER',
-                condition=(exemplary.id == checkout.exemplary)
-                ).select(book.id,
-                where=(checkout.return_date != Null) | (checkout.id == Null)))
+                                  condition=(exemplary.book == book.id)
+                                  ).join(checkout, 'LEFT OUTER',
+                       condition=(exemplary.id == checkout.exemplary)
+        ).select(book.id,
+                 where=(checkout.return_date != Null) | (checkout.id == Null)))
         for book_id, in cursor.fetchall():
             result[book_id] = True
         return result
@@ -171,11 +173,11 @@ class Book(metaclass=PoolMeta):
         exemplary = pool.get('library.book.exemplary').__table__()
         book = cls.__table__()
         query = book.join(exemplary,
-            condition=(exemplary.book == book.id)
-            ).join(checkout, 'LEFT OUTER',
-            condition=(exemplary.id == checkout.exemplary)
-            ).select(book.id,
-            where=(checkout.return_date != Null) | (checkout.id == Null))
+                          condition=(exemplary.book == book.id)
+                          ).join(checkout, 'LEFT OUTER',
+                                 condition=(exemplary.id == checkout.exemplary)
+                                 ).select(book.id,
+                                          where=(checkout.return_date != Null) | (checkout.id == Null))
         return [('id', 'in' if value else 'not in', query)]
 
 
@@ -183,30 +185,41 @@ class Exemplary(metaclass=PoolMeta):
     __name__ = 'library.book.exemplary'
 
     checkouts = fields.One2Many('library.user.checkout', 'exemplary',
-        'Checkouts')
+                                'Checkouts')
     is_available = fields.Function(
         fields.Boolean('Is available', help='If True, the exemplary is '
-            'currently available for borrowing'),
+                       'currently available for borrowing'),
         'getter_is_available', searcher='search_is_available')
 
     @classmethod
     def getter_is_available(cls, exemplaries, name):
         checkout = Pool().get('library.user.checkout').__table__()
         cursor = Transaction().connection.cursor()
-        result = {x.id: True for x in exemplaries}
+        result = cls._get_availability_result(exemplaries, name)
+        where = cls._get_availability_where_clause(exemplaries, checkout, name)
         cursor.execute(*checkout.select(checkout.exemplary,
-                where=(checkout.return_date == Null)
-                & checkout.exemplary.in_([x.id for x in exemplaries])))
+                                        where=where))
         for exemplary_id, in cursor.fetchall():
             result[exemplary_id] = False
         return result
 
     @classmethod
+    def _get_availability_where_clause(cls, exemplaries, checkout, name):
+        where = (checkout.return_date == Null) & checkout.exemplary.in_(
+            [x.id for x in exemplaries])
+        return where
+
+    @classmethod
+    def _get_availability_result(cls, exemplaries, name):
+        result = {x.id: True for x in exemplaries}
+        return result
+
+    @classmethod
     def search_rec_name(cls, name, clause):
         return ['OR',
-            ('identifier',) + tuple(clause[1:]),
-            ('book.title',) + tuple(clause[1:]),
-            ]
+                ('identifier',) + tuple(clause[1:]),
+                ('book.title',) + tuple(clause[1:]),
+                ]
 
     @classmethod
     def order_rec_name(cls, tables):
@@ -227,8 +240,13 @@ class Exemplary(metaclass=PoolMeta):
         pool = Pool()
         checkout = pool.get('library.user.checkout').__table__()
         exemplary = cls.__table__()
-        query = exemplary.join(checkout, 'LEFT OUTER',
-            condition=(exemplary.id == checkout.exemplary)
-            ).select(exemplary.id,
-            where=(checkout.return_date != Null) | (checkout.id == Null))
+        query = cls._get_availibility_query(exemplary, checkout, name)
         return [('id', 'in' if value else 'not in', query)]
+
+    @classmethod
+    def _get_availibility_query(cls, exemplary, checkout, name):
+        query = exemplary.join(checkout, 'LEFT OUTER',
+                               condition=(exemplary.id == checkout.exemplary)
+                               ).select(exemplary.id,
+                                        where=(checkout.return_date != Null) | (checkout.id == Null))
+        return query

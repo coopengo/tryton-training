@@ -9,9 +9,9 @@ def register():
         library.Room,
         library.Shelf,
         library.Exemplary,
-        library.ExemplaryDisplayer,
         wizard.CreateShelvesParameters,
         wizard.CreateExemplariesParameters,
+        wizard.ExemplaryDisplayer,
         wizard.SetLocation,
         wizard.ReturnToShelfSelectedExemplaries,
         module='library_organize', type_='model')

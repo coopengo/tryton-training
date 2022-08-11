@@ -10,10 +10,11 @@ from trytond.wizard import Button
 __all__ = [
     'CreateExemplaries',
     'CreateExemplariesParameters',
+    'ExemplaryDisplayer',
     'FuseBooks',
     'FuseBooksSelectMain',
     'FuseBooksPreview',
-    ]
+]
 
 
 class CreateExemplaries(Wizard):
@@ -22,10 +23,10 @@ class CreateExemplaries(Wizard):
 
     start_state = 'parameters'
     parameters = StateView('library.book.create_exemplaries.parameters',
-        'library.create_exemplaries_parameters_view_form', [
-            Button('Cancel', 'end', 'tryton-cancel'),
-            Button('Create', 'create_exemplaries', 'tryton-go-next',
-                default=True)])
+                           'library.create_exemplaries_parameters_view_form', [
+                               Button('Cancel', 'end', 'tryton-cancel'),
+                               Button('Create', 'create_exemplaries', 'tryton-go-next',
+                                      default=True)])
     create_exemplaries = StateTransition()
     open_exemplaries = StateAction('library.act_exemplary')
 
@@ -33,40 +34,53 @@ class CreateExemplaries(Wizard):
     def __setup__(cls):
         super().__setup__()
         cls._error_messages.update({
-                'invalid_model': 'This action should be started from a book',
-                'invalid_date': 'You cannot purchase books in the future',
-                })
+            'invalid_model': 'This action should be started from a book',
+            'invalid_date': 'You cannot purchase books in the future',
+        })
 
     def default_parameters(self, name):
-        if Transaction().context.get('active_model', '') != 'library.book':
-            self.raise_user_error('invalid_model')
+        if self.parameters._default_values:
+            return self.parameters._default_values
+        book = None
+        if Transaction().context.get('active_model', '') == 'library.book':
+            book = Transaction().context.get('active_id')
+
         return {
             'acquisition_date': datetime.date.today(),
-            'book': Transaction().context.get('active_id'),
+            'book': book,
             'acquisition_price': 0,
-            }
+            'exemplaries_to_select': [],
+        }
+
+    def _exemplary_filling(self, to_display, exemplary):
+        exemplary.book = self.parameters.book
+        exemplary.acquisition_date = self.parameters.acquisition_date
+        exemplary.acquisition_price = self.parameters.acquisition_price
+        exemplary.identifier = self.parameters.identifier_start + str(
+            len(to_display) + 1)
+
+    def _save_exemplaries(self, exemplaries_list, model):
+        model.save(exemplaries_list)
 
     def transition_create_exemplaries(self):
         if (self.parameters.acquisition_date and
                 self.parameters.acquisition_date > datetime.date.today()):
             self.raise_user_error('invalid_date')
+        ExemplaryDisplayer = Pool().get('library.book.exemplary.displayer')
         Exemplary = Pool().get('library.book.exemplary')
-        to_create = []
-        while len(to_create) < self.parameters.number_of_exemplaries:
-            exemplary = Exemplary()
-            exemplary.book = self.parameters.book
-            exemplary.acquisition_date = self.parameters.acquisition_date
-            exemplary.acquisition_price = self.parameters.acquisition_price
-            exemplary.identifier = self.parameters.identifier_start + str(
-                len(to_create) + 1)
-            to_create.append(exemplary)
-        Exemplary.save(to_create)
-        self.parameters.exemplaries = to_create
-        return 'open_exemplaries'
+        to_display = []
+        while len(to_display) < self.parameters.number_of_exemplaries:
+            exemplary_displayer = ExemplaryDisplayer()
+            self._exemplary_filling(to_display, exemplary_displayer)
+            self.parameters.exemplaries_to_select = list(
+                self.parameters.exemplaries_to_select) + [exemplary_displayer]
+            to_display.append(exemplary_displayer)
+        self._save_exemplaries(to_display, Exemplary)
+        return 'set_location'
 
     def do_open_exemplaries(self, action):
         action['pyson_domain'] = PYSONEncoder().encode([
-                ('id', 'in', [x.id for x in self.parameters.exemplaries])])
+            ('id', 'in', [x.id for x in self.parameters.exemplaries])])
         return action, {}
 
 
@@ -76,16 +90,32 @@ class CreateExemplariesParameters(ModelView):
 
     book = fields.Many2One('library.book', 'Book', readonly=True)
     number_of_exemplaries = fields.Integer('Number of exemplaries',
-        required=True, domain=[('number_of_exemplaries', '>', 0)],
-        help='The number of exemplaries that will be created')
+                                           required=True, domain=[('number_of_exemplaries', '>', 0)],
+                                           help='The number of exemplaries that will be created')
     identifier_start = fields.Char('Identifier start', required=True,
-        help='The starting point for exemplaries identifiers')
+                                   help='The starting point for exemplaries identifiers')
     acquisition_date = fields.Date('Acquisition Date')
     acquisition_price = fields.Numeric('Acquisition Price', digits=(16, 2),
-        domain=[('acquisition_price', '>=', 0)],
-        help='The price that was paid per exemplary bought')
+                                       domain=[('acquisition_price', '>=', 0)],
+                                       help='The price that was paid per exemplary bought')
     exemplaries = fields.Many2Many('library.book.exemplary', None, None,
-        'Exemplaries')
+                                   'Exemplaries')
+
+
+class ExemplaryDisplayer(ModelView):
+    'Exemplary Displayer'
+    __name__ = 'library.book.exemplary.displayer'
+    _rec_name = 'identifier'
+
+    book = fields.Many2One('library.book', 'Book')
+    identifier = fields.Char('Identifier')
+    acquisition_date = fields.Date('Acquisition Date')
+    acquisition_price = fields.Numeric('Acquisition Price', digits=(16, 2),
+                                       domain=['OR', ('acquisition_price', '=', None),
+                                               ('acquisition_price', '>', 0)])
+
+    def get_rec_name(self, name):
+        return '%s: %s' % (self.book.rec_name, self.identifier)
 
 
 class FuseBooks(Wizard):
@@ -96,16 +126,17 @@ class FuseBooks(Wizard):
 
     check_authors = StateTransition()
     select_main = StateView('library.book.fuse.select_main',
-        'library.fuse_select_main_view_form', [
-            Button('Cancel', 'end', 'tryton-cancel'),
-            Button('Preview', 'check_compatibility', 'tryton-go-next',
-                default=True)])
+                            'library.fuse_select_main_view_form', [
+                                Button('Cancel', 'end', 'tryton-cancel'),
+                                Button('Preview', 'check_compatibility', 'tryton-go-next',
+                                       default=True)])
     check_compatibility = StateTransition()
     preview = StateView('library.book.fuse.preview',
-        'library.fuse_preview_view_form', [
-            Button('Previous', 'select_main', 'tryton-go-previous'),
-            Button('Cancel', 'end', 'tryton-cancel'),
-            Button('Merge', 'merge', 'tryton-go-next', default=True)])
+                        'library.fuse_preview_view_form', [
+                            Button('Previous', 'select_main',
+                                   'tryton-go-previous'),
+                            Button('Cancel', 'end', 'tryton-cancel'),
+                            Button('Merge', 'merge', 'tryton-go-next', default=True)])
     merge = StateTransition()
     refresh = StateTransition()
 
@@ -113,12 +144,12 @@ class FuseBooks(Wizard):
     def __setup__(cls):
         super().__setup__()
         cls._error_messages.update({
-                'invalid_model': 'This action should be started from a book',
-                'multiple_authors': 'You cannot fuse books with different '
-                'authors',
-                'bad_matches': 'The following fields will not be a perfect '
-                'match: %(fields)s',
-                })
+            'invalid_model': 'This action should be started from a book',
+            'multiple_authors': 'You cannot fuse books with different '
+            'authors',
+            'bad_matches': 'The following fields will not be a perfect '
+            'match: %(fields)s',
+        })
 
     def transition_check_authors(self):
         if Transaction().context.get('active_model', '') != 'library.book':
@@ -138,22 +169,22 @@ class FuseBooks(Wizard):
             'selected_books': [x.id for x in books],
             'main_book': Transaction().context.get('active_id'),
             'number_of_exemplaries': sum(x.number_of_exemplaries for x in
-                books),
-            }
+                                         books),
+        }
 
     def transition_check_compatibility(self):
         values = self._get_merge_values()
         bad_matches = [k for k, v in values.items() if not v[1]]
         if bad_matches:
             self.raise_user_warning('bad_matches_warning' + str(
-                    self.select_main.main_book.id), 'bad_matches',
+                self.select_main.main_book.id), 'bad_matches',
                 {'fields': ', '.join(bad_matches)})
         return 'preview'
 
     def _get_merge_fields(self):
         return ['isbn', 'editor', 'genre', 'summary', 'description',
-            'publishing_date', 'cover', 'page_count', 'edition_stopped',
-            'author']
+                'publishing_date', 'cover', 'page_count', 'edition_stopped',
+                'author']
 
     def _get_merge_values(self):
         result = {}
@@ -182,7 +213,7 @@ class FuseBooks(Wizard):
         return {
             'final_book': [book],
             'number_of_exemplaries': self.select_main.number_of_exemplaries,
-            }
+        }
 
     def transition_merge(self):
         pool = Pool()
@@ -194,7 +225,7 @@ class FuseBooks(Wizard):
         book.save()
         other_books = [x for x in self.select_main.selected_books if x != book]
         Exemplary.write(sum([list(x.exemplaries) for x in other_books], []),
-            {'book': book.id})
+                        {'book': book.id})
         Book.delete(other_books)
         return 'end'
 
@@ -207,11 +238,11 @@ class FuseBooksSelectMain(ModelView):
     __name__ = 'library.book.fuse.select_main'
 
     main_book = fields.Many2One('library.book', 'Main Book', required=True,
-        domain=[('id', 'in', Eval('selected_books'))])
+                                domain=[('id', 'in', Eval('selected_books'))])
     selected_books = fields.Many2Many('library.book', None, None,
-        'Selected books', readonly=True)
+                                      'Selected books', readonly=True)
     number_of_exemplaries = fields.Integer('Number of exemplaries',
-        readonly=True)
+                                           readonly=True)
 
 
 class FuseBooksPreview(ModelView):
@@ -219,6 +250,6 @@ class FuseBooksPreview(ModelView):
     __name__ = 'library.book.fuse.preview'
 
     final_book = fields.One2Many('library.book', None, 'Final book',
-        readonly=True)
+                                 readonly=True)
     number_of_exemplaries = fields.Integer('Number of exemplaries',
-        readonly=True)
+                                           readonly=True)

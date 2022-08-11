@@ -1,13 +1,9 @@
 <?xml version="1.0"?>
-<form>
-    <label name="book" />
-    <field name="book" />
-    <label name="identifier" />
-    <field name="identifier" />
-    <label name="in_storage" />
-    <field name="in_storage" />
-    <label name="room" />
-    <field name="room" />
-    <label name="shelf" />
-    <field name="shelf" />
-</form>
+<data>
+    <xpath expr="/form/field[@name='identifier']" position="after">
+        <label name="in_storage"/>
+        <field name="in_storage" />
+        <label name="shelf" />
+        <field name="shelf" />
+    </xpath>
+</data>

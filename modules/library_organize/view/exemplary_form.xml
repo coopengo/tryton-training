@@ -8,8 +8,6 @@
         <label name="quarantine_off" />
         <field name="quarantine_off" />
         <separator id="location" string="Location" colspan="4" />
-        <label name="room" />
-        <field name="room" />
         <label name="shelf" />
         <field name="shelf" />
     </xpath>

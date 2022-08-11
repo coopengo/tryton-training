@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<form>
+    <label name="book" />
+    <field name="book" />
+    <label name="identifier" />
+    <field name="identifier" />
+</form>

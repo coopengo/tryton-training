@@ -13,6 +13,7 @@ def register():
         library.Book,
         library.Exemplary,
         wizard.CreateExemplariesParameters,
+        wizard.ExemplaryDisplayer,
         wizard.FuseBooksSelectMain,
         wizard.FuseBooksPreview,
         module='library', type_='model')

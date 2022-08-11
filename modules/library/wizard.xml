@@ -21,6 +21,33 @@
             <field name="type">form</field>
             <field name="name">create_exemplaries_parameters_form</field>
         </record>
+        <!-- ##################### -->
+        <!-- # Exemplary Display # -->
+        <!-- ##################### -->
+        <record model="ir.ui.view" id="exemplary_displayer_view_form">
+            <field name="model">library.book.exemplary.displayer</field>
+            <field name="type">form</field>
+            <field name="name">exemplary_displayer_form</field>
+        </record>
+        <record model="ir.ui.view" id="exemplary_displayer_view_list">
+            <field name="model">library.book.exemplary.displayer</field>
+            <field name="type">tree</field>
+            <field name="name">exemplary_displayer_list</field>
+        </record>
+        <record model="ir.action.act_window" id="act_exemplary_displayer">
+            <field name="name">Exemplaries</field>
+            <field name="res_model">library.book.exemplary.displayer</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_exemplary_displayer_view_list">
+            <field name="sequence" eval="10" />
+            <field name="view" ref="exemplary_displayer_view_list" />
+            <field name="act_window" ref="act_exemplary_displayer" />
+        </record>
+        <record model="ir.action.act_window.view" id="act_exemplary_displayer_view_form">
+            <field name="sequence" eval="20" />
+            <field name="view" ref="exemplary_displayer_view_form" />
+            <field name="act_window" ref="act_exemplary_displayer" />
+        </record>
         <!-- ############## -->
         <!-- # Fuse Books # -->
         <!-- ############## -->

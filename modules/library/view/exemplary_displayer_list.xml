@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<tree editable="1">
+    <field name="book" expand="1" />
+    <field name="identifier" expand="1"/>
+</tree>

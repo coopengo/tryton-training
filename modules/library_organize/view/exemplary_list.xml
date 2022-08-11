@@ -1,8 +1,10 @@
 <?xml version="1.0"?>
 <data>
+    <xpath expr="/tree/field[@name='rec_name']" position="replace">
+        <field name="rec_name" string="Exemplary" expand="1"/>
+    </xpath>
     <xpath expr="/tree/field[@name='rec_name']" position="after">
-        <field name="room" />
-        <field name="shelf" />
+        <field name="shelf" string="Location" expand="1"/>
         <field name="in_storage" expand="1" />
     </xpath>
 </data>

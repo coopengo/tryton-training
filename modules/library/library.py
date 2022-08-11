@@ -18,7 +18,7 @@ __all__ = [
     'Author',
     'Book',
     'Exemplary',
-    ]
+]
 
 
 class Genre(ModelSQL, ModelView):
@@ -27,7 +27,7 @@ class Genre(ModelSQL, ModelView):
 
     name = fields.Char('Name', required=True)
     editors = fields.Many2Many('library.editor-library.genre', 'genre',
-        'editor', 'Editors', readonly=True)
+                               'editor', 'Editors', readonly=True)
 
 
 class Editor(ModelSQL, ModelView):
@@ -36,9 +36,9 @@ class Editor(ModelSQL, ModelView):
 
     name = fields.Char('Name', required=True)
     creation_date = fields.Date('Creation date',
-        help='The date at which the editor was created')
+                                help='The date at which the editor was created')
     genres = fields.Many2Many('library.editor-library.genre', 'editor',
-        'genre', 'Genres')
+                              'genre', 'Genres')
     number_of_books = fields.Function(
         fields.Integer('Number of books'),
         'getter_number_of_books')
@@ -51,8 +51,9 @@ class Editor(ModelSQL, ModelView):
 
         cursor = Transaction().connection.cursor()
         cursor.execute(*book.select(book.editor, Count(book.id),
-                where=book.editor.in_([x.id for x in editors]),
-                group_by=[book.editor]))
+                                    where=book.editor.in_(
+                                        [x.id for x in editors]),
+                                    group_by=[book.editor]))
         for editor_id, count in cursor.fetchall():
             result[editor_id] = count
         return result
@@ -63,9 +64,9 @@ class EditorGenreRelation(ModelSQL):
     __name__ = 'library.editor-library.genre'
 
     editor = fields.Many2One('library.editor', 'Editor', required=True,
-        ondelete='CASCADE')
+                             ondelete='CASCADE')
     genre = fields.Many2One('library.genre', 'Genre', required=True,
-        ondelete='RESTRICT')
+                            ondelete='RESTRICT')
 
 
 class Author(ModelSQL, ModelView):
@@ -75,13 +76,14 @@ class Author(ModelSQL, ModelView):
     books = fields.One2Many('library.book', 'author', 'Books')
     name = fields.Char('Name', required=True)
     birth_date = fields.Date('Birth date',
-        states={'required': Bool(Eval('death_date', 'False'))},
-        depends=['death_date'])
+                             states={'required': Bool(
+                                 Eval('death_date', 'False'))},
+                             depends=['death_date'])
     death_date = fields.Date('Death date',
-        domain=['OR', ('death_date', '=', None),
-            ('death_date', '>', Eval('birth_date'))],
-        states={'invisible': ~Eval('birth_date')},
-        depends=['birth_date'])
+                             domain=['OR', ('death_date', '=', None),
+                                     ('death_date', '>', Eval('birth_date'))],
+                             states={'invisible': ~Eval('birth_date')},
+                             depends=['birth_date'])
     gender = fields.Selection([('man', 'Man'), ('woman', 'Woman')], 'Gender')
     age = fields.Function(
         fields.Integer('Age', states={'invisible': ~Eval('death_date')}),
@@ -91,11 +93,11 @@ class Author(ModelSQL, ModelView):
         'getter_number_of_books')
     genres = fields.Function(
         fields.Many2Many('library.genre', None, None, 'Genres',
-            states={'invisible': ~Eval('books', False)}),
+                         states={'invisible': ~Eval('books', False)}),
         'getter_genres', searcher='searcher_genres')
     latest_book = fields.Function(
         fields.Many2One('library.book', 'Latest Book',
-            states={'invisible': ~Eval('books', False)}),
+                        states={'invisible': ~Eval('books', False)}),
         'getter_latest_book')
 
     @fields.depends('birth_date')
@@ -143,15 +145,15 @@ class Author(ModelSQL, ModelView):
         cursor = Transaction().connection.cursor()
 
         sub_query = sub_book.select(sub_book.author,
-            Max(Coalesce(sub_book.publishing_date, datetime.date.min),
-                window=Window([sub_book.author])).as_('max_date'),
-            where=sub_book.author.in_([x.id for x in authors]))
+                                    Max(Coalesce(sub_book.publishing_date, datetime.date.min),
+                                        window=Window([sub_book.author])).as_('max_date'),
+                                    where=sub_book.author.in_([x.id for x in authors]))
 
         cursor.execute(*book.join(sub_query,
-                condition=(book.author == sub_query.author)
-                & (Coalesce(book.publishing_date, datetime.date.min)
-                    == sub_query.max_date)
-                ).select(book.author, book.id))
+                                  condition=(book.author == sub_query.author)
+                                  & (Coalesce(book.publishing_date, datetime.date.min)
+                                      == sub_query.max_date)
+                                  ).select(book.author, book.id))
         for author_id, book in cursor.fetchall():
             result[author_id] = book
         return result
@@ -164,8 +166,9 @@ class Author(ModelSQL, ModelView):
 
         cursor = Transaction().connection.cursor()
         cursor.execute(*book.select(book.author, Count(book.id),
-                where=book.author.in_([x.id for x in authors]),
-                group_by=[book.author]))
+                                    where=book.author.in_(
+                                        [x.id for x in authors]),
+                                    group_by=[book.author]))
         for author_id, count in cursor.fetchall():
             result[author_id] = count
         return result
@@ -181,29 +184,29 @@ class Book(ModelSQL, ModelView):
     _rec_name = 'title'
 
     author = fields.Many2One('library.author', 'Author', required=True,
-        ondelete='CASCADE')
+                             ondelete='CASCADE')
     exemplaries = fields.One2Many('library.book.exemplary', 'book',
-        'Exemplaries')
+                                  'Exemplaries')
     title = fields.Char('Title', required=True)
     genre = fields.Many2One('library.genre', 'Genre', ondelete='RESTRICT',
-        domain=[('editors', '=', Eval('editor'))], depends=['editor'],
-        required=False)
+                            domain=[('editors', '=', Eval('editor'))], depends=['editor'],
+                            required=False)
     editor = fields.Many2One('library.editor', 'Editor', ondelete='RESTRICT',
-        domain=[If(
-                Bool(Eval('publishing_date', False)),
-                [('creation_date', '<=', Eval('publishing_date'))],
-                [])],
-        required=True, depends=['publishing_date'])
+                             domain=[If(
+                                 Bool(Eval('publishing_date', False)),
+                                 [('creation_date', '<=', Eval('publishing_date'))],
+                                 [])],
+                             required=True, depends=['publishing_date'])
     isbn = fields.Char('ISBN', size=13,
-        help='The International Standard Book Number')
+                       help='The International Standard Book Number')
     publishing_date = fields.Date('Publishing date')
     description = fields.Char('Description')
     summary = fields.Text('Summary')
     cover = fields.Binary('Cover')
     page_count = fields.Integer('Page Count',
-        help='The number of page in the book')
+                                help='The number of page in the book')
     edition_stopped = fields.Boolean('Edition stopped',
-        help='If True, this book will not be printed again in this version')
+                                     help='If True, this book will not be printed again in this version')
     number_of_exemplaries = fields.Function(
         fields.Integer('Number of exemplaries'),
         'getter_number_of_exemplaries')
@@ -218,15 +221,15 @@ class Book(ModelSQL, ModelView):
         cls._sql_constraints += [
             ('author_title_uniq', Unique(t, t.author, t.title),
                 'The title must be unique per author!'),
-            ]
+        ]
         cls._error_messages.update({
-                'invalid_isbn': 'ISBN should only be digits',
-                'bad_isbn_size': 'ISBN must have 13 digits',
-                'invalid_isbn_checksum': 'ISBN checksum invalid',
-                })
+            'invalid_isbn': 'ISBN should only be digits',
+            'bad_isbn_size': 'ISBN must have 13 digits',
+            'invalid_isbn_checksum': 'ISBN checksum invalid',
+        })
         cls._buttons.update({
-                'create_exemplaries': {},
-                })
+            'create_exemplaries': {},
+        })
 
     @classmethod
     def validate(cls, books):
@@ -246,9 +249,9 @@ class Book(ModelSQL, ModelView):
             if checksum % 10:
                 cls.raise_user_error('invalid_isbn_checksum')
 
-    #@classmethod
-    #def default_exemplaries(cls):
-        #return [{}]
+    # @classmethod
+    # def default_exemplaries(cls):
+        # return [{}]
 
     @fields.depends('editor', 'genre')
     def on_change_editor(self):
@@ -276,7 +279,7 @@ class Book(ModelSQL, ModelView):
         for exemplary in self.exemplaries:
             if not exemplary.acquisition_date:
                 continue
-            if not latest or(
+            if not latest or (
                     latest.acquisition_date < exemplary.acquisition_date):
                 latest = exemplary
         return latest.id if latest else None
@@ -289,8 +292,9 @@ class Book(ModelSQL, ModelView):
 
         cursor = Transaction().connection.cursor()
         cursor.execute(*exemplary.select(exemplary.book, Count(exemplary.id),
-                where=exemplary.book.in_([x.id for x in books]),
-                group_by=[exemplary.book]))
+                                         where=exemplary.book.in_(
+                                             [x.id for x in books]),
+                                         group_by=[exemplary.book]))
         for book_id, count in cursor.fetchall():
             result[book_id] = count
         return result
@@ -307,12 +311,12 @@ class Exemplary(ModelSQL, ModelView):
     _rec_name = 'identifier'
 
     book = fields.Many2One('library.book', 'Book', ondelete='CASCADE',
-        required=True)
+                           required=True)
     identifier = fields.Char('Identifier', required=True)
     acquisition_date = fields.Date('Acquisition Date')
     acquisition_price = fields.Numeric('Acquisition Price', digits=(16, 2),
-        domain=['OR', ('acquisition_price', '=', None),
-            ('acquisition_price', '>', 0)])
+                                       domain=['OR', ('acquisition_price', '=', None),
+                                               ('acquisition_price', '>', 0)])
 
     @classmethod
     def __setup__(cls):
@@ -321,7 +325,7 @@ class Exemplary(ModelSQL, ModelView):
         cls._sql_constraints += [
             ('identifier_uniq', Unique(t, t.identifier),
                 'The identifier must be unique!'),
-            ]
+        ]
 
     @classmethod
     def default_acquisition_date(cls):

@@ -34,13 +34,18 @@
             <field name="name">create_exemplaries_parameters_form</field>
         </record>
         <menuitem parent="library.menu_library" sequence="80" action="act_create_exemplaries" id="menu_create_exemplaries" />
-        <!-- ################################# -->
-        <!-- # Create Exemplaries Displayer # -->
-        <!-- ################################# -->
-        <record model="ir.ui.view" id="create_exemplaries_displayer_view_list">
+        <!-- ##################### -->
+        <!-- # Exemplary Display # -->
+        <!-- ##################### -->
+        <record model="ir.ui.view" id="exemplary_displayer_view_form">
             <field name="model">library.book.exemplary.displayer</field>
-            <field name="type">tree</field>
-            <field name="name">create_exemplaries_displayer_list</field>
+            <field name="inherit" ref="library.exemplary_displayer_view_form" />
+            <field name="name">exemplary_displayer_form</field>
+        </record>
+        <record model="ir.ui.view" id="exemplary_displayer_view_list">
+            <field name="model">library.book.exemplary.displayer</field>
+            <field name="inherit" ref="library.exemplary_displayer_view_list" />
+            <field name="name">exemplary_displayer_list</field>
         </record>
         <!-- ################ -->
         <!-- # Set Location # -->
