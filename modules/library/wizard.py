@@ -59,15 +59,16 @@ class CreateExemplaries(Wizard):
         exemplary.identifier = self.parameters.identifier_start + str(
             len(to_display) + 1)
 
-    def _save_exemplaries(self, exemplaries_list, model):
-        model.save(exemplaries_list)
+    def _save_exemplaries(self, exemplaries_list):
+        Exemplary = Pool().get('library.book.exemplary')
+        Exemplary.save(exemplaries_list)
 
     def transition_create_exemplaries(self):
+        self.parameters.exemplaries_to_select = []
         if (self.parameters.acquisition_date and
                 self.parameters.acquisition_date > datetime.date.today()):
             self.raise_user_error('invalid_date')
         ExemplaryDisplayer = Pool().get('library.book.exemplary.displayer')
-        Exemplary = Pool().get('library.book.exemplary')
         to_display = []
         while len(to_display) < self.parameters.number_of_exemplaries:
             exemplary_displayer = ExemplaryDisplayer()
@@ -75,8 +76,8 @@ class CreateExemplaries(Wizard):
             self.parameters.exemplaries_to_select = list(
                 self.parameters.exemplaries_to_select) + [exemplary_displayer]
             to_display.append(exemplary_displayer)
-        self._save_exemplaries(to_display, Exemplary)
-        return 'set_location'
+        self._save_exemplaries(to_display)
+        return 'open_exemplaries'
 
     def do_open_exemplaries(self, action):
         action['pyson_domain'] = PYSONEncoder().encode([

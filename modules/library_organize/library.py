@@ -1,5 +1,5 @@
 import datetime
-from sql import Null, Literal
+from sql import Null, Literal, Cast
 from sql.aggregate import Count
 from trytond.pool import PoolMeta, Pool
 from trytond.transaction import Transaction
@@ -81,9 +81,12 @@ class Shelf(ModelSQL, ModelView):
 
     @classmethod
     def search_rec_name(cls, name, clause):
-        return ['OR',
-                ('room.name',) + tuple(clause[1:]),
-                ('identifier',) + tuple(clause[1:]),
+        try:
+            value = int(clause[2][1:len(clause[2])-1])
+        except:
+            cls.raise_user_error('The shelf identifier must be numeric')
+        return [
+                ('identifier', '=',  value),
                 ]
 
     def get_rec_name(self, name):

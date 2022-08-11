@@ -104,8 +104,12 @@ class CreateExemplaries(metaclass=PoolMeta):
         exemplary.room = None
         exemplary.shelf = None
 
-    def _save_exemplaries(self, exemplaries_list, model):
+    def _save_exemplaries(self, exemplaries_list):
         pass
+    
+    def transition_create_exemplaries(self):
+        super().transition_create_exemplaries()
+        return 'set_location'
 
     def default_set_location(self, name):
         exemplaries_to_display = []
