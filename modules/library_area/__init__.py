@@ -6,7 +6,10 @@ from . import wizard
 
 def register():
     Pool.register(
-        module='library_borrow', type_='model')
+        library.Floor,
+        library.Room,
+        library.Shelf,
+        module='library_area', type_='model')
 
     Pool.register(
-        module='library_borrow', type_='wizard')
+        module='library_area', type_='wizard')

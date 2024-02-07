@@ -1,5 +1,87 @@
 <?xml version="1.0"?>
 <tryton>
     <data>
+        <!-- ######### -->
+        <!-- # Floor # -->
+        <!-- ######### -->
+        <record model="ir.ui.view" id="floor_view_form">
+            <field name="model">library.floor</field>
+            <field name="type">form</field>
+            <field name="name">floor_form</field>
+        </record>
+        <record model="ir.ui.view" id="floor_view_list">
+            <field name="model">library.floor</field>
+            <field name="type">tree</field>
+            <field name="name">floor_list</field>
+        </record>
+        <record model="ir.action.act_window" id="act_floor">
+            <field name="name">Floors</field>
+            <field name="res_model">library.floor</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_floor_view_list">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="floor_view_list"/>
+            <field name="act_window" ref="act_floor"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_floor_view_form">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="floor_view_form"/>
+            <field name="act_window" ref="act_floor"/>
+        </record>
+        <!-- ######## -->
+        <!-- # Room # -->
+        <!-- ######## -->
+        <record model="ir.ui.view" id="room_view_form">
+            <field name="model">library.room</field>
+            <field name="type">form</field>
+            <field name="name">room_form</field>
+        </record>
+        <record model="ir.ui.view" id="room_view_list">
+            <field name="model">library.room</field>
+            <field name="type">tree</field>
+            <field name="name">room_list</field>
+        </record>
+        <record model="ir.action.act_window" id="act_room">
+            <field name="name">Rooms</field>
+            <field name="res_model">library.room</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_room_view_list">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="room_view_list"/>
+            <field name="act_window" ref="act_room"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_room_view_form">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="room_view_form"/>
+            <field name="act_window" ref="act_room"/>
+        </record>
+        <menuitem parent="library.menu_library" sequence="50" action="act_room" id="menu_room"/>
+        <!-- ######### -->
+        <!-- # Shelf # -->
+        <!-- ######### -->
+        <record model="ir.ui.view" id="shelf_view_form">
+            <field name="model">library.shelf</field>
+            <field name="type">form</field>
+            <field name="name">shelf_form</field>
+        </record>
+        <record model="ir.ui.view" id="shelf_view_list">
+            <field name="model">library.shelf</field>
+            <field name="type">tree</field>
+            <field name="name">shelf_list</field>
+        </record>
+        <record model="ir.action.act_window" id="act_shelf">
+            <field name="name">Shelves</field>
+            <field name="res_model">library.shelf</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_shelf_view_list">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="shelf_view_list"/>
+            <field name="act_window" ref="act_shelf"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_shelf_view_form">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="shelf_view_form"/>
+            <field name="act_window" ref="act_shelf"/>
+        </record>
     </data>
 </tryton>
