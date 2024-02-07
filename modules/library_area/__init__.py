@@ -9,6 +9,8 @@ def register():
         library.Floor,
         library.Room,
         library.Shelf,
+        library.Book,
+        library.Exemplary,
         module='library_area', type_='model')
 
     Pool.register(

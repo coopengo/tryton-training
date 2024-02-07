@@ -83,5 +83,13 @@
             <field name="view" ref="shelf_view_form"/>
             <field name="act_window" ref="act_shelf"/>
         </record>
+        <!-- ######## -->
+        <!-- # Book # -->
+        <!-- ######## -->
+        <record model="ir.ui.view" id="book_view_form">
+            <field name="model">library.book</field>
+            <field name="inherit" ref="library.book_view_form"/>
+            <field name="name">book_form</field>
+        </record>
     </data>
 </tryton>

@@ -3,7 +3,9 @@ from trytond.model import ModelSQL, fields, ModelView
 __all__ = [
     'Floor',
     'Room',
-    'Shelf'
+    'Shelf',
+    'Book',
+    'Exemplary'
     ]
 
 from trytond.pool import PoolMeta
@@ -33,6 +35,14 @@ class Shelf(ModelSQL, ModelView):
     room = fields.Many2One('library.room', 'Room', required=True, ondelete='CASCADE')
     name = fields.Char('Name', required=True, help='Name of the shelf')
     exemplaries = fields.One2Many('library.book.exemplary', 'shelf', 'Exemplaries')
+
+
+class Book(metaclass=PoolMeta):
+    __name__ = 'library.book'
+
+    @classmethod
+    def default_exemplaries(cls):
+        return []  # needed to avoid default creation of one exemplary with no identifier
 
 
 class Exemplary(metaclass=PoolMeta):
