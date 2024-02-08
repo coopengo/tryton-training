@@ -72,3 +72,17 @@ class Exemplary(metaclass=PoolMeta):
     __name__ = 'library.book.exemplary'
 
     shelf = fields.Many2One('library.shelf', 'Shelf', ondelete='RESTRICT')  # exemplaries must be moved from shelf before deletion
+    room = fields.Function(
+        fields.Many2One('library.room', 'Room'),
+        'getter_room'
+    )
+    floor = fields.Function(
+        fields.Many2One('library.floor', 'Floor'),
+        'getter_floor'
+    )
+
+    def getter_room(self, name):
+        return self.shelf.room.id if self.shelf and self.shelf.room else None
+
+    def getter_floor(self, name):
+        return self.room.floor.id if self.room and self.room.floor else None

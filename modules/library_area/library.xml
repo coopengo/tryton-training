@@ -91,5 +91,18 @@
             <field name="inherit" ref="library.book_view_form"/>
             <field name="name">book_form</field>
         </record>
+        <!-- ############# -->
+        <!-- # Exemplary # -->
+        <!-- ############# -->
+        <record model="ir.ui.view" id="exemplary_view_form">
+            <field name="model">library.book.exemplary</field>
+            <field name="inherit" ref="library.exemplary_view_form"/>
+            <field name="name">exemplary_form</field>
+        </record>
+        <record model="ir.ui.view" id="exemplary_view_list">
+            <field name="model">library.book.exemplary</field>
+            <field name="inherit" ref="library.exemplary_view_list"/>
+            <field name="name">exemplary_list</field>
+        </record>
     </data>
 </tryton>
