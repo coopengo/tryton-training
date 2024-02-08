@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
 <tree>
     <field name="name"/>
-    <field name="room"/>
-    <field name="exemplaries"/>
+    <field name="number_of_exemplaries"/>
 </tree>

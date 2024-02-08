@@ -4,6 +4,5 @@
     <field name="name"/>
     <label name="floor"/>
     <field name="floor"/>
-    <label name="shelves"/>
-    <field name="shelves"/>
+    <field name="shelves" colspan="2"/>
 </form>

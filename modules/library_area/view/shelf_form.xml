@@ -4,6 +4,4 @@
     <field name="name"/>
     <label name="room"/>
     <field name="room"/>
-    <label name="exemplaries"/>
-    <field name="exemplaries"/>
 </form>

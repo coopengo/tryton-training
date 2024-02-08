@@ -1,3 +1,4 @@
+from sql.aggregate import Count
 from trytond.model import ModelSQL, fields, ModelView
 
 __all__ = [
@@ -8,7 +9,8 @@ __all__ = [
     'Exemplary'
     ]
 
-from trytond.pool import PoolMeta
+from trytond.pool import PoolMeta, Pool
+from trytond.transaction import Transaction
 
 
 class Floor(ModelSQL, ModelView):
@@ -35,6 +37,27 @@ class Shelf(ModelSQL, ModelView):
     room = fields.Many2One('library.room', 'Room', required=True, ondelete='CASCADE')
     name = fields.Char('Name', required=True, help='Name of the shelf')
     exemplaries = fields.One2Many('library.book.exemplary', 'shelf', 'Exemplaries')
+    number_of_exemplaries = fields.Function(
+        fields.Integer('Number of exemplaries'),
+        'getter_number_of_exemplaries')
+
+    @fields.depends('exemplaries')
+    def on_change_with_number_of_exemplaries(self):
+        return len(self.exemplaries or [])
+
+    @classmethod
+    def getter_number_of_exemplaries(cls, shelves, name):
+        result = {x.id: 0 for x in shelves}
+        Exemplary = Pool().get('library.book.exemplary')
+        exemplary = Exemplary.__table__()
+
+        cursor = Transaction().connection.cursor()
+        cursor.execute(*exemplary.select(exemplary.shelf, Count(exemplary.id),
+                where=exemplary.shelf.in_([x.id for x in shelves]),
+                group_by=[exemplary.shelf]))
+        for shelf_id, count in cursor.fetchall():
+            result[shelf_id] = count
+        return result
 
 
 class Book(metaclass=PoolMeta):

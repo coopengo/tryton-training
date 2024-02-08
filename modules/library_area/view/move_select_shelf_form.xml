@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<form>
+    <label name="floor"/>
+    <field name="floor" widget="selection" colspan="3"/>
+    <label name="room"/>
+    <field name="room" widget="selection" colspan="3"/>
+    <label name="shelf"/>
+    <field name="shelf" widget="selection" colspan="3"/>
+    <label name="before_number_of_exemplaries"/>
+    <field name="before_number_of_exemplaries" colspan="3"/>
+    <label name="after_number_of_exemplaries"/>
+    <field name="after_number_of_exemplaries" colspan="3"/>
+    <field name="selected_exemplaries" colspan="4"/>
+</form>
