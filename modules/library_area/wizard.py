@@ -1,12 +1,13 @@
 from trytond.model import ModelView, fields
-from trytond.pool import Pool
+from trytond.pool import Pool, PoolMeta
 from trytond.pyson import Eval, If, Bool
 from trytond.transaction import Transaction
 from trytond.wizard import Wizard, StateTransition, StateView, Button
 
 __all__ = [
     'MoveExemplaries',
-    'MoveExemplariesSelectShelf'
+    'MoveExemplariesSelectShelf',
+    'Borrow'
 ]
 
 
@@ -127,6 +128,12 @@ class MoveExemplariesSelectShelf(ModelView):
         return self.shelf.number_of_exemplaries + count_new_exemplaries
 
 
-class MoveExemplariesPreview(ModelView):
-    'Move Exemplaries Preview'
-    __name__ = 'library.book.examplary.move.preview'
+class Borrow(metaclass=PoolMeta):
+    __name__ = 'library.user.borrow'
+
+    def transition_borrow(self):
+        next_state = super().transition_borrow()
+        exemplaries = self.select_books.exemplaries
+        Exemplary = Pool().get('library.book.exemplary')
+        Exemplary.write(list(exemplaries), {'shelf': None})
+        return next_state

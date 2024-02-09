@@ -16,4 +16,5 @@ def register():
 
     Pool.register(
         wizard.MoveExemplaries,
+        wizard.Borrow,
         module='library_area', type_='wizard')
