@@ -104,6 +104,24 @@
             <field name="inherit" ref="library.exemplary_view_list"/>
             <field name="name">exemplary_list</field>
         </record>
+        <record model="ir.action.act_window.domain" id="act_exemplary_domain_borrowed">
+            <field name="name">Borrowed</field>
+            <field name="sequence" eval="10"/>
+            <field name="domain" eval="[('is_available', '=', False)]" pyson="1"/>
+            <field name="act_window" ref="library.act_exemplary"/>
+        </record>
+        <record model="ir.action.act_window.domain" id="act_exemplary_domain_in_shelf">
+            <field name="name">In shelf</field>
+            <field name="sequence" eval="20"/>
+            <field name="domain" eval="['AND', [('is_available', '=', True), ('is_in_reserve', '=', False)]]" pyson="1"/>
+            <field name="act_window" ref="library.act_exemplary"/>
+        </record>
+        <record model="ir.action.act_window.domain" id="act_exemplary_domain_in_reserve">
+            <field name="name">In reserve</field>
+            <field name="sequence" eval="20"/>
+            <field name="domain" eval="[('is_in_reserve', '=', True)]" pyson="1"/>
+            <field name="act_window" ref="library.act_exemplary"/>
+        </record>
         <!-- ########### -->
         <!-- # Reserve # -->
         <!-- ########### -->

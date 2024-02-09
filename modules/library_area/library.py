@@ -77,8 +77,6 @@ class Book(metaclass=PoolMeta):
 
     @classmethod
     def getter_is_in_reserve(cls, books, name):
-        # si pas dispo, forcément pas en réserve
-        # si un exemplaire est dispo et pas dans une étagère => en réserve
         pool = Pool()
         checkout = pool.get('library.user.checkout').__table__()
         exemplary = pool.get('library.book.exemplary').__table__()
@@ -116,9 +114,38 @@ class Exemplary(metaclass=PoolMeta):
                            'getter_room')
     floor = fields.Function(fields.Many2One('library.floor', 'Floor'),
                             'getter_floor')
+    is_in_reserve = fields.Function(fields.Boolean('In reserve', help='If True, this exemplary is in reserve'),
+                                    'getter_is_in_reserve', searcher='search_is_in_reserve')
 
     def getter_room(self, name):
         return self.shelf.room.id if self.shelf and self.shelf.room else None
 
     def getter_floor(self, name):
         return self.room.floor.id if self.room and self.room.floor else None
+
+    @classmethod
+    def getter_is_in_reserve(cls, exemplaries, name):
+        pool = Pool()
+        checkout = pool.get('library.user.checkout').__table__()
+        exemplary = cls.__table__()
+        result = {x.id: False for x in exemplaries}
+        cursor = Transaction().connection.cursor()
+        cursor.execute(*exemplary
+                       .join(checkout, 'LEFT OUTER', condition=(exemplary.id == checkout.exemplary))
+                       .select(exemplary.id, where=((checkout.return_date != Null) | (checkout.id == Null)) & (exemplary.shelf == Null)))
+        for exemplary_id, in cursor.fetchall():
+            result[exemplary_id] = True
+        return result
+
+    @classmethod
+    def search_is_in_reserve(cls, name, clause):
+        _, operator, value = clause
+        if operator == '!=':
+            value = not value
+        pool = Pool()
+        checkout = pool.get('library.user.checkout').__table__()
+        exemplary = cls.__table__()
+        query = (exemplary
+                 .join(checkout, 'LEFT OUTER', condition=(exemplary.id == checkout.exemplary))
+                 .select(exemplary.id, where=((checkout.return_date != Null) | (checkout.id == Null)) & (exemplary.shelf == Null)))
+        return [('id', 'in' if value else 'not in', query)]
