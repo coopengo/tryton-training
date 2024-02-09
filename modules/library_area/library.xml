@@ -104,6 +104,25 @@
             <field name="inherit" ref="library.exemplary_view_list"/>
             <field name="name">exemplary_list</field>
         </record>
+        <!-- ########### -->
+        <!-- # Reserve # -->
+        <!-- ########### -->
+        <record model="ir.action.act_window" id="act_reserve">
+            <field name="name">Reserve</field>
+            <field name="res_model">library.book</field>
+            <field name="domain" eval="[('is_in_reserve', '=', True)]" pyson="1"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_reserve_view_list">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="library.book_view_list"/>
+            <field name="act_window" ref="act_reserve"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_reserve_view_form">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="library.book_view_form"/>
+            <field name="act_window" ref="act_reserve"/>
+        </record>
+        <menuitem parent="library.menu_library" sequence="60" action="act_reserve" id="menu_reserve"/>
         <!-- ############# -->
         <!-- # Relates # -->
         <!-- ############# -->

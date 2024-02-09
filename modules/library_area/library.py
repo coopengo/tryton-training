@@ -1,3 +1,4 @@
+from sql import Null
 from sql.aggregate import Count
 from trytond.model import ModelSQL, fields, ModelView
 
@@ -67,9 +68,44 @@ class Shelf(ModelSQL, ModelView):
 class Book(metaclass=PoolMeta):
     __name__ = 'library.book'
 
+    is_in_reserve = fields.Function(fields.Boolean('In reserve', help='If True, this book as at least one exemplary in reserve'),
+                                    'getter_is_in_reserve', searcher='search_is_in_reserve')
+
     @classmethod
     def default_exemplaries(cls):
         return []  # needed to avoid default creation of one exemplary with no identifier
+
+    @classmethod
+    def getter_is_in_reserve(cls, books, name):
+        # si pas dispo, forcément pas en réserve
+        # si un exemplaire est dispo et pas dans une étagère => en réserve
+        pool = Pool()
+        checkout = pool.get('library.user.checkout').__table__()
+        exemplary = pool.get('library.book.exemplary').__table__()
+        book = cls.__table__()
+        result = {x.id: False for x in books}
+        cursor = Transaction().connection.cursor()
+        cursor.execute(*book
+                       .join(exemplary, condition=(exemplary.book == book.id))
+                       .join(checkout, 'LEFT OUTER', condition=(exemplary.id == checkout.exemplary))
+                       .select(book.id, where=((checkout.return_date != Null) | (checkout.id == Null)) & (exemplary.shelf == Null)))
+        for book_id, in cursor.fetchall():
+            result[book_id] = True
+        return result
+
+    @classmethod
+    def search_is_in_reserve(cls, name, clause):
+        _, operator, value = clause
+        if operator == '!=':
+            value = not value
+        pool = Pool()
+        checkout = pool.get('library.user.checkout').__table__()
+        exemplary = pool.get('library.book.exemplary').__table__()
+        book = cls.__table__()
+        query = (book.join(exemplary, condition=(exemplary.book == book.id))
+                 .join(checkout, 'LEFT OUTER', condition=(exemplary.id == checkout.exemplary))
+                 .select(book.id, where=((checkout.return_date != Null) | (checkout.id == Null)) & (exemplary.shelf == Null)))
+        return [('id', 'in' if value else 'not in', query)]
 
 
 class Exemplary(metaclass=PoolMeta):
