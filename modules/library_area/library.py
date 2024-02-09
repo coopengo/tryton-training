@@ -35,15 +35,19 @@ class Shelf(ModelSQL, ModelView):
     __name__ = 'library.shelf'
 
     room = fields.Many2One('library.room', 'Room', required=True, ondelete='CASCADE')
-    name = fields.Char('Name', required=True, help='Name of the shelf')
     exemplaries = fields.One2Many('library.book.exemplary', 'shelf', 'Exemplaries')
-    number_of_exemplaries = fields.Function(
-        fields.Integer('Number of exemplaries'),
-        'getter_number_of_exemplaries')
+    floor = fields.Function(fields.Many2One('library.floor', 'Floor'),
+                            'getter_floor')
+    name = fields.Char('Name', required=True, help='Name of the shelf')
+    number_of_exemplaries = fields.Function(fields.Integer('Number of exemplaries'),
+                                            'getter_number_of_exemplaries')
 
     @fields.depends('exemplaries')
     def on_change_with_number_of_exemplaries(self):
         return len(self.exemplaries or [])
+
+    def getter_floor(self, name):
+        return self.room.floor.id if self.room and self.room.floor else None
 
     @classmethod
     def getter_number_of_exemplaries(cls, shelves, name):
@@ -71,15 +75,11 @@ class Book(metaclass=PoolMeta):
 class Exemplary(metaclass=PoolMeta):
     __name__ = 'library.book.exemplary'
 
-    shelf = fields.Many2One('library.shelf', 'Shelf', ondelete='RESTRICT')  # exemplaries must be moved from shelf before deletion
-    room = fields.Function(
-        fields.Many2One('library.room', 'Room'),
-        'getter_room'
-    )
-    floor = fields.Function(
-        fields.Many2One('library.floor', 'Floor'),
-        'getter_floor'
-    )
+    shelf = fields.Many2One('library.shelf', 'Shelf', ondelete='SET NULL')  # exemplaries are moved to reserve if shelf is deleted
+    room = fields.Function(fields.Many2One('library.room', 'Room'),
+                           'getter_room')
+    floor = fields.Function(fields.Many2One('library.floor', 'Floor'),
+                            'getter_floor')
 
     def getter_room(self, name):
         return self.shelf.room.id if self.shelf and self.shelf.room else None
