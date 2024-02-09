@@ -30,6 +30,7 @@ class MoveExemplaries(Wizard):
     def __setup__(cls):
         super().__setup__()
         cls._error_messages.update({
+            'no_exemplary': 'You have to select at least one exemplary to move to a shelf',
             'unavailable_moved_exemplary': 'You cannot move an unavailable exemplary',
             'no_shelf_specified': 'You must specify a shelf to move exemplaries'
         })
@@ -39,6 +40,8 @@ class MoveExemplaries(Wizard):
             self.raise_user_error('invalid_model')
         Exemplary = Pool().get('library.book.exemplary')
         exemplaries = Exemplary.browse(Transaction().context.get('active_ids'))
+        if len(exemplaries) == 0:
+            self.raise_user_error('no_exemplary')
         if not all([x.is_available for x in exemplaries]):
             self.raise_user_error('unavailable_moved_exemplary')
         return 'select_shelf'
