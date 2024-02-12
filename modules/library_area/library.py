@@ -125,8 +125,13 @@ class Exemplary(metaclass=PoolMeta):
     is_in_reserve = fields.Function(fields.Boolean('In reserve', help='If True, this exemplary is in reserve'),
                                     'getter_is_in_reserve', searcher='search_is_in_reserve')
 
-    status = fields.Function(fields.Text('Status', readonly=True),
-                             'on_change_with_status')
+    status = fields.Function(fields.Selection([
+        (Status.IN_RESERVE.value, 'IN RESERVE'),
+        (Status.IN_SHELF.value, 'IN SHELF'),
+        (Status.BORROWED.value, 'BORROWED'),
+        (Status.UNDEFINED.value, 'UNDEFINED')],
+        'Status', readonly=True),
+        'on_change_with_status')
 
     def getter_room(self, name):
         return self.shelf.room.id if self.shelf and self.shelf.room else None
@@ -170,4 +175,4 @@ class Exemplary(metaclass=PoolMeta):
             status = Status.BORROWED
         if self.is_in_reserve is True:
             status = Status.IN_RESERVE
-        return status.value.replace('_', ' ').upper()
+        return status.value
