@@ -27,7 +27,7 @@ class Floor(ModelSQL, ModelView):
     __name__ = 'library.floor'
 
     rooms = fields.One2Many('library.room', 'floor', 'Rooms')
-    name = fields.Char('Name', required=True, help='Name of the floor')  # TODO: checker si > 0 et autres prérequis
+    name = fields.Char('Name', required=True, help='Name of the floor')
 
     @classmethod
     def __setup__(cls):
@@ -45,7 +45,7 @@ class Room(ModelSQL, ModelView):
 
     floor = fields.Many2One('library.floor', 'Floor', required=True, ondelete='CASCADE')
     shelves = fields.One2Many('library.shelf', 'room', 'Shelves')
-    name = fields.Char('Name', required=True, help='Name of the room')  # TODO: checker si taille OK / autres prérequis
+    name = fields.Char('Name', required=True, help='Name of the room')
 
     @classmethod
     def __setup__(cls):

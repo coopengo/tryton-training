@@ -56,7 +56,6 @@ class MoveExemplaries(Wizard):
         exemplaries = Exemplary.browse(Transaction().context.get('active_ids'))
         return {
             'selected_exemplaries': [x.id for x in exemplaries]
-            # TODO: ajouter la selection par défaut des floor/room si shelf commun à tous (complètement facultatif)
         }
 
     def transition_move_to_shelf(self):
@@ -141,7 +140,6 @@ class CreateExemplaries(metaclass=PoolMeta):
         })
 
     def transition_create_exemplaries(self):
-        # TODO discussion : mieux de tout réécrire en une seule requête pour les perfs ou d'écrire en deux étapes pour la lisibilité ?
         next_state = super().transition_create_exemplaries()
 
         shelf = self.parameters.shelf
