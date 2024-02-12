@@ -1,6 +1,6 @@
 from sql import Null
 from sql.aggregate import Count
-from trytond.model import ModelSQL, fields, ModelView
+from trytond.model import ModelSQL, fields, ModelView, Unique
 from enum import Enum
 
 __all__ = [
@@ -29,6 +29,15 @@ class Floor(ModelSQL, ModelView):
     rooms = fields.One2Many('library.room', 'floor', 'Rooms')
     name = fields.Char('Name', required=True, help='Name of the floor')  # TODO: checker si > 0 et autres prérequis
 
+    @classmethod
+    def __setup__(cls):
+        super().__setup__()
+        t = cls.__table__()
+        cls._sql_constraints += [
+            ('name_uniq', Unique(t, t.name),
+                'The floor must be unique!'),
+            ]
+
 
 class Room(ModelSQL, ModelView):
     'Room'
@@ -37,6 +46,15 @@ class Room(ModelSQL, ModelView):
     floor = fields.Many2One('library.floor', 'Floor', required=True, ondelete='CASCADE')
     shelves = fields.One2Many('library.shelf', 'room', 'Shelves')
     name = fields.Char('Name', required=True, help='Name of the room')  # TODO: checker si taille OK / autres prérequis
+
+    @classmethod
+    def __setup__(cls):
+        super().__setup__()
+        t = cls.__table__()
+        cls._sql_constraints += [
+            ('name_uniq', Unique(t, t.floor, t.name),
+                'The room must be unique in its floor!'),
+            ]
 
 
 class Shelf(ModelSQL, ModelView):
@@ -50,6 +68,15 @@ class Shelf(ModelSQL, ModelView):
     name = fields.Char('Name', required=True, help='Name of the shelf')
     number_of_exemplaries = fields.Function(fields.Integer('Number of exemplaries'),
                                             'getter_number_of_exemplaries')
+
+    @classmethod
+    def __setup__(cls):
+        super().__setup__()
+        t = cls.__table__()
+        cls._sql_constraints += [
+            ('name_uniq', Unique(t, t.room, t.name),
+                'The shelf must be unique in its room!'),
+            ]
 
     @fields.depends('exemplaries')
     def on_change_with_number_of_exemplaries(self):
