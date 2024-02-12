@@ -160,6 +160,17 @@ class Exemplary(metaclass=PoolMeta):
         'Status', readonly=True),
         'on_change_with_status')
 
+    @fields.depends('shelf', 'is_available', 'is_in_reserve')
+    def on_change_with_status(self, name=None):
+        status = Status.UNDEFINED
+        if self.shelf is not None:
+            status = Status.IN_SHELF
+        if self.shelf is None and self.is_available is False:
+            status = Status.BORROWED
+        if self.is_in_reserve is True:
+            status = Status.IN_RESERVE
+        return status.value
+
     def getter_room(self, name):
         return self.shelf.room.id if self.shelf and self.shelf.room else None
 
@@ -192,14 +203,3 @@ class Exemplary(metaclass=PoolMeta):
                  .join(checkout, 'LEFT OUTER', condition=(exemplary.id == checkout.exemplary))
                  .select(exemplary.id, where=((checkout.return_date != Null) | (checkout.id == Null)) & (exemplary.shelf == Null)))
         return [('id', 'in' if value else 'not in', query)]
-
-    @fields.depends('shelf', 'is_available', 'is_in_reserve')
-    def on_change_with_status(self, name=None):
-        status = Status.UNDEFINED
-        if self.shelf is not None:
-            status = Status.IN_SHELF
-        if self.shelf is None and self.is_available is False:
-            status = Status.BORROWED
-        if self.is_in_reserve is True:
-            status = Status.IN_RESERVE
-        return status.value
