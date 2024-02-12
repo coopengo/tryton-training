@@ -7,6 +7,8 @@ from trytond.wizard import Wizard, StateTransition, StateView, Button
 __all__ = [
     'MoveExemplaries',
     'MoveExemplariesSelectShelf',
+    'CreateExemplaries',
+    'CreateExemplariesParameters',
     'Borrow'
 ]
 
@@ -126,6 +128,71 @@ class MoveExemplariesSelectShelf(ModelView):
             if x.shelf is None or x.shelf.id != self.shelf.id
         ])
         return self.shelf.number_of_exemplaries + count_new_exemplaries
+
+
+class CreateExemplaries(metaclass=PoolMeta):
+    __name__ = 'library.book.create_exemplaries'
+
+    @classmethod
+    def __setup__(cls):
+        super().__setup__()
+        cls._error_messages.update({
+            'no_shelf_specified': 'You must specify a shelf for exemplaries that will not be put in the reserve'
+        })
+
+    def transition_create_exemplaries(self):
+        # TODO discussion : mieux de tout réécrire en une seule requête pour les perfs ou d'écrire en deux étapes pour la lisibilité ?
+        next_state = super().transition_create_exemplaries()
+
+        shelf = self.parameters.shelf
+
+        exemplaries = self.parameters.exemplaries
+        number_to_reserve = self.parameters.number_to_reserve
+
+        if number_to_reserve is not None and number_to_reserve < len(exemplaries):
+            if self.parameters.shelf is None:
+                self.raise_user_error('no_shelf_specified')
+            exemplaries = exemplaries[:-number_to_reserve]
+
+        Exemplary = Pool().get('library.book.exemplary')
+        Exemplary.write(list(exemplaries), {'shelf': shelf})
+
+        return next_state
+
+
+class CreateExemplariesParameters(metaclass=PoolMeta):
+    __name__ = 'library.book.create_exemplaries.parameters'
+
+    floor = fields.Many2One('library.floor', 'Floor')
+    room = fields.Many2One('library.room', 'Room',
+                           domain=[If(
+                               Bool(Eval('floor')),
+                               ('floor', '=', Eval('floor')),
+                               ('id', '=', None)
+                           )], depends=['floor'])
+    shelf = fields.Many2One('library.shelf', 'Shelf',
+                            domain=[If(
+                                Bool(Eval('room')),
+                                ('room', '=', Eval('room')),
+                                ('id', '=', None)
+                            )], depends=['room'])
+    number_to_reserve = fields.Integer(
+        'Number to put to reserve',
+        domain=[
+            ('number_to_reserve', '>=', 0),
+            ('number_to_reserve', '<=', Eval('number_of_exemplaries'))
+        ], depends=['number_of_exemplaries'], help='Number of new exemplaries to put to reserve'
+    )
+
+    @fields.depends('floor')
+    def on_change_with_room(self):
+        if self.floor is None:
+            return None
+
+    @fields.depends('floor', 'room')
+    def on_change_with_shelf(self):
+        if self.room is None:
+            return None
 
 
 class Borrow(metaclass=PoolMeta):

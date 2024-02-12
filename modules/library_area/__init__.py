@@ -12,9 +12,11 @@ def register():
         library.Book,
         library.Exemplary,
         wizard.MoveExemplariesSelectShelf,
+        wizard.CreateExemplariesParameters,
         module='library_area', type_='model')
 
     Pool.register(
         wizard.MoveExemplaries,
+        wizard.CreateExemplaries,
         wizard.Borrow,
         module='library_area', type_='wizard')

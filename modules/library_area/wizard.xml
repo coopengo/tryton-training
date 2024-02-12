@@ -21,5 +21,13 @@
             <field name="type">form</field>
             <field name="name">move_select_shelf_form</field>
         </record>
+        <!-- ################################# -->
+        <!-- # Create Exemplaries Parameters # -->
+        <!-- ################################# -->
+        <record model="ir.ui.view" id="create_exemplaries_parameters_view_form">
+            <field name="model">library.book.create_exemplaries.parameters</field>
+            <field name="inherit" ref="library.create_exemplaries_parameters_view_form"/>
+            <field name="name">create_exemplaries_parameters_form</field>
+        </record>
     </data>
 </tryton>
