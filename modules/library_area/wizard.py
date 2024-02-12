@@ -131,9 +131,22 @@ class MoveExemplariesSelectShelf(ModelView):
 class Borrow(metaclass=PoolMeta):
     __name__ = 'library.user.borrow'
 
+    @classmethod
+    def __setup__(cls):
+        super().__setup__()
+        cls._error_messages.update({
+                'in_reserve': 'Exemplary %(exemplary)s is currently in reserve and unavailable for checkout',
+                })
+
     def transition_borrow(self):
-        next_state = super().transition_borrow()
         exemplaries = self.select_books.exemplaries
         Exemplary = Pool().get('library.book.exemplary')
+
+        for exemplary in exemplaries:
+            if exemplary.is_in_reserve:
+                self.raise_user_error('in_reserve', {'exemplary': exemplary.rec_name})
+
+        next_state = super().transition_borrow()
+
         Exemplary.write(list(exemplaries), {'shelf': None})
         return next_state
