@@ -1,3 +1,6 @@
+import datetime
+from datetime import timedelta
+
 from sql import Null
 from sql.aggregate import Count
 from trytond.model import ModelSQL, fields, ModelView, Unique
@@ -11,6 +14,7 @@ __all__ = [
     'Exemplary'
     ]
 
+from trytond.model.fields import SQL_OPERATORS
 from trytond.pool import PoolMeta, Pool
 from trytond.transaction import Transaction
 
@@ -20,6 +24,7 @@ class Status(Enum):
     IN_RESERVE = 'in_reserve'
     IN_SHELF = 'in_shelf'
     BORROWED = 'borrowed'
+    IN_QUARANTINE = 'in_quarantine'
 
 
 class Floor(ModelSQL, ModelView):
@@ -152,25 +157,42 @@ class Exemplary(metaclass=PoolMeta):
     is_in_reserve = fields.Function(fields.Boolean('In reserve', help='If True, this exemplary is in reserve'),
                                     'getter_is_in_reserve', searcher='search_is_in_reserve')
 
+    in_quarantine_date = fields.Date('In quarantine date', help='The date on which the exemplary entered in quarantine')
+    out_quarantine_date = fields.Function(
+        fields.Date('Out quarantine date', help='The date on which the book may be released from quarantine'),
+        'on_change_with_out_quarantine_date', searcher='search_out_quarantine_date'
+    )
+    is_in_quarantine = fields.Function(fields.Boolean('In quarantine', help='If True, this exemplary is in quarantine'),
+                                    'getter_is_in_quarantine', searcher='search_is_in_quarantine')
+
     status = fields.Function(fields.Selection([
         (Status.IN_RESERVE.value, 'IN RESERVE'),
         (Status.IN_SHELF.value, 'IN SHELF'),
         (Status.BORROWED.value, 'BORROWED'),
-        (Status.UNDEFINED.value, 'UNDEFINED')],
+        (Status.UNDEFINED.value, 'UNDEFINED'),
+        (Status.IN_QUARANTINE.value, 'IN QUARANTINE')],
         'Status', readonly=True),
         'on_change_with_status')
 
     @fields.depends('shelf', 'is_available', 'is_in_reserve')
     def on_change_with_status(self, name=None):
         status = Status.UNDEFINED
-        if self.is_available is True:
-            if self.shelf is None:
+        if self.is_in_quarantine:
+            status = Status.IN_QUARANTINE
+        elif self.is_available is True:
+            if self.is_in_reserve:
                 status = Status.IN_RESERVE
             else:
                 status = Status.IN_SHELF
         elif self.is_available is False:
             status = Status.BORROWED
         return status.value
+
+    @fields.depends('in_quarantine_date')
+    def on_change_with_out_quarantine_date(self, name=None):
+        if self.in_quarantine_date is None:
+            return None
+        return self.in_quarantine_date + timedelta(days=7)
 
     def getter_room(self, name):
         return self.shelf.room.id if self.shelf and self.shelf.room else None
@@ -204,3 +226,43 @@ class Exemplary(metaclass=PoolMeta):
                  .join(checkout, 'LEFT OUTER', condition=(exemplary.id == checkout.exemplary))
                  .select(exemplary.id, where=((checkout.return_date != Null) | (checkout.id == Null)) & (exemplary.shelf == Null)))
         return [('id', 'in' if value else 'not in', query)]
+
+    @classmethod
+    def getter_is_in_quarantine(cls, exemplaries, name):
+        pool = Pool()
+        checkout = pool.get('library.user.checkout').__table__()
+        exemplary = cls.__table__()
+        result = {x.id: False for x in exemplaries}
+        cursor = Transaction().connection.cursor()
+        cursor.execute(*exemplary
+                       .join(checkout, 'LEFT OUTER', condition=(exemplary.id == checkout.exemplary))
+                       .select(exemplary.id, where=((checkout.return_date != Null) | (checkout.id == Null)) & (exemplary.in_quarantine_date != Null)))
+        for exemplary_id, in cursor.fetchall():
+            result[exemplary_id] = True
+        return result
+
+    @classmethod
+    def search_is_in_quarantine(cls, name, clause):
+        _, operator, value = clause
+        if operator == '!=':
+            value = not value
+        pool = Pool()
+        checkout = pool.get('library.user.checkout').__table__()
+        exemplary = cls.__table__()
+        query = (exemplary
+                 .join(checkout, 'LEFT OUTER', condition=(exemplary.id == checkout.exemplary))
+                 .select(exemplary.id, where=((checkout.return_date != Null) | (checkout.id == Null)) & (exemplary.in_quarantine_date != Null)))
+        return [('id', 'in' if value else 'not in', query)]
+
+    @classmethod
+    def search_out_quarantine_date(cls, name, clause):
+        exemplary = cls.__table__()
+        _, operator, value = clause
+        if isinstance(value, datetime.date):
+            value = value + datetime.timedelta(days=-7)
+        if isinstance(value, (list, tuple)):
+            value = [(x + datetime.timedelta(days=-7) if x else x) for x in value]
+        Operator = SQL_OPERATORS[operator]
+        query = exemplary.select(exemplary.id,
+            where=Operator(exemplary.in_quarantine_date, value))
+        return [('id', 'in', query)]

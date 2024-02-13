@@ -141,6 +141,44 @@
             <field name="act_window" ref="act_reserve"/>
         </record>
         <menuitem parent="library.menu_library" sequence="60" action="act_reserve" id="menu_reserve"/>
+        <!-- ############## -->
+        <!-- # Quarantine # -->
+        <!-- ############## -->
+        <record model="ir.action.act_window" id="act_quarantine">
+            <field name="name">Quarantine</field>
+            <field name="res_model">library.book.exemplary</field>
+            <field name="domain" eval="[('is_in_quarantine', '=', True)]" pyson="1"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_quarantine_view_list">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="library.exemplary_view_list"/>
+            <field name="act_window" ref="act_quarantine"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_quarantine_view_form">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="library.exemplary_view_form"/>
+            <field name="act_window" ref="act_quarantine"/>
+        </record>
+        <menuitem parent="library.menu_library" sequence="70" action="act_quarantine" id="menu_quarantine"/>
+        <!-- ################### -->
+        <!-- # Late quarantine # -->
+        <!-- ################### -->
+        <record model="ir.action.act_window" id="act_late_quarantine">
+            <field name="name">Late Quarantine</field>
+            <field name="res_model">library.book.exemplary</field>
+            <field name="domain" eval="[('out_quarantine_date', '&lt;', Date())]" pyson="1"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_late_quarantine_view_list">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="library.exemplary_view_list"/>
+            <field name="act_window" ref="act_late_quarantine"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_late_quarantine_view_form">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="library.exemplary_view_form"/>
+            <field name="act_window" ref="act_late_quarantine"/>
+        </record>
+        <menuitem parent="library.menu_library" sequence="80" action="act_late_quarantine" id="menu_late_quarantine"/>
         <!-- ############# -->
         <!-- # Relates # -->
         <!-- ############# -->

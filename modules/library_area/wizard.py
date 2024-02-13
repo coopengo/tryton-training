@@ -1,3 +1,5 @@
+from datetime import date
+
 from trytond.model import ModelView, fields
 from trytond.pool import Pool, PoolMeta
 from trytond.pyson import Eval, If, Bool
@@ -7,9 +9,11 @@ from trytond.wizard import Wizard, StateTransition, StateView, Button
 __all__ = [
     'MoveExemplaries',
     'MoveExemplariesSelectShelf',
+    'ExitQuarantine',
     'CreateExemplaries',
     'CreateExemplariesParameters',
-    'Borrow'
+    'Borrow',
+    'Return'
 ]
 
 
@@ -35,7 +39,8 @@ class MoveExemplaries(Wizard):
         cls._error_messages.update({
             'no_exemplary': 'You have to select at least one exemplary to move to a shelf',
             'unavailable_moved_exemplary': 'You cannot move an unavailable exemplary',
-            'no_shelf_specified': 'You must specify a shelf to move exemplaries'
+            'no_shelf_specified': 'You must specify a shelf to move exemplaries',
+            'quarantined_exemplary': 'Exemplary %(exemplary)s is currently in quarantine so it cannot be moved'
         })
 
     def transition_check_availability(self):
@@ -45,6 +50,9 @@ class MoveExemplaries(Wizard):
         exemplaries = Exemplary.browse(Transaction().context.get('active_ids'))
         if len(exemplaries) == 0:
             self.raise_user_error('no_exemplary')
+        for e in exemplaries:
+            if e.is_in_quarantine:
+                self.raise_user_error('quarantined_exemplary', {'exemplary': e.rec_name})
         if not all([x.is_available for x in exemplaries]):
             self.raise_user_error('unavailable_moved_exemplary')
         return 'select_shelf'
@@ -129,6 +137,42 @@ class MoveExemplariesSelectShelf(ModelView):
         return self.shelf.number_of_exemplaries + count_new_exemplaries
 
 
+class ExitQuarantine(Wizard):
+    'Exit Quarantine'
+    __name__ = 'library.book.exemplary.exit_quarantine'
+
+    start_state = 'exit_quarantine'
+    exit_quarantine = StateTransition()
+
+    @classmethod
+    def __setup__(cls):
+        super().__setup__()
+        cls._error_messages.update({
+                'invalid_model': 'This action should be started from an exemplary',
+                'not_in_quarantine': 'Exemplary %(exemplary)s is not currently in quarantine',
+                'must_stay_in_quarantine': 'Exemplary %(exemplary)s must stay in quarantine until %(out_quarantine_date)s',
+                })
+
+    def transition_exit_quarantine(self):
+        today = date.today()
+        if Transaction().context.get('active_model', '') != 'library.book.exemplary':
+            self.raise_user_error('invalid_model')
+        Exemplary = Pool().get('library.book.exemplary')
+        exemplaries = Exemplary.browse(Transaction().context.get('active_ids'))
+        for exemplary in exemplaries:
+            if exemplary.is_in_quarantine is False:
+                self.raise_user_error('not_in_quarantine', {'exemplary': exemplary.rec_name})
+            if exemplary.out_quarantine_date > date.today():
+                self.raise_user_error('must_stay_in_quarantine',
+                                      {'exemplary': exemplary.rec_name,
+                                       'out_quarantine_date': exemplary.out_quarantine_date})
+        Exemplary.write(list(exemplaries), {'in_quarantine_date': None})
+        return 'end'
+
+    def end(self):
+        return 'reload'
+
+
 class CreateExemplaries(metaclass=PoolMeta):
     __name__ = 'library.book.create_exemplaries'
 
@@ -210,4 +254,16 @@ class Borrow(metaclass=PoolMeta):
                 self.raise_user_error('in_reserve', {'exemplary': exemplary.rec_name})
 
         next_state = super().transition_borrow()
+        return next_state
+
+
+class Return(metaclass=PoolMeta):
+    __name__ = 'library.user.return'
+
+    def transition_return_(self):
+        next_state = super().transition_return_()
+        checkouts = self.select_checkouts.checkouts
+        exemplaries = [c.exemplary for c in checkouts]
+        Exemplary = Pool().get('library.book.exemplary')
+        Exemplary.write(list(exemplaries), {'in_quarantine_date': self.select_checkouts.date})
         return next_state
