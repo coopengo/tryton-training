@@ -23,7 +23,7 @@ class MoveExemplaries(Wizard):
     select_shelf = StateView('library.book.examplary.move.select_shelf',
                              'library_area.move_select_shelf_view_form', [
                                  Button('Cancel', 'end', 'tryton-cancel'),
-                                 Button('Put on reserve', 'move_to_reserve', 'tryton-go-next'),
+                                 Button('Move to reserve', 'move_to_reserve', 'tryton-go-next'),
                                  Button('Move', 'move_to_shelf', 'tryton-go-next', default=True)
                              ])
     move_to_reserve = StateTransition()
@@ -136,7 +136,7 @@ class CreateExemplaries(metaclass=PoolMeta):
     def __setup__(cls):
         super().__setup__()
         cls._error_messages.update({
-            'no_shelf_specified': 'You must specify a shelf for exemplaries that will not be put in the reserve'
+            'no_shelf_specified': 'You must specify a shelf for exemplaries that will not be moved to the reserve'
         })
 
     def transition_create_exemplaries(self):
@@ -175,11 +175,11 @@ class CreateExemplariesParameters(metaclass=PoolMeta):
                                 ('id', '=', None)
                             )], depends=['room'])
     number_to_reserve = fields.Integer(
-        'Number to put to reserve',
+        'Number to move to reserve',
         domain=[
             ('number_to_reserve', '>=', 0),
             ('number_to_reserve', '<=', Eval('number_of_exemplaries'))
-        ], depends=['number_of_exemplaries'], help='Number of new exemplaries to put to reserve'
+        ], depends=['number_of_exemplaries'], help='Number of new exemplaries to move to the reserve'
     )
 
     @fields.depends('floor')
