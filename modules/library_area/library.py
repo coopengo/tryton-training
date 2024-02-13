@@ -149,10 +149,10 @@ class Book(metaclass=PoolMeta):
 class Exemplary(metaclass=PoolMeta):
     __name__ = 'library.book.exemplary'
 
-    shelf = fields.Many2One('library.shelf', 'Shelf', ondelete='SET NULL')  # exemplaries are moved to reserve if shelf is deleted
-    room = fields.Function(fields.Many2One('library.room', 'Room'),
+    shelf = fields.Many2One('library.shelf', 'Shelf', ondelete='SET NULL', select=True)  # exemplaries are moved to reserve if shelf is deleted
+    room = fields.Function(fields.Many2One('library.room', 'Room', select=True),
                            'getter_room')
-    floor = fields.Function(fields.Many2One('library.floor', 'Floor'),
+    floor = fields.Function(fields.Many2One('library.floor', 'Floor', select=True),
                             'getter_floor')
     is_in_reserve = fields.Function(fields.Boolean('In reserve', help='If True, this exemplary is in reserve'),
                                     'getter_is_in_reserve', searcher='search_is_in_reserve')
@@ -171,7 +171,7 @@ class Exemplary(metaclass=PoolMeta):
         (Status.BORROWED.value, 'BORROWED'),
         (Status.UNDEFINED.value, 'UNDEFINED'),
         (Status.IN_QUARANTINE.value, 'IN QUARANTINE')],
-        'Status', readonly=True),
+        'Status', readonly=True, select=True),
         'on_change_with_status')
 
     @fields.depends('shelf', 'is_available', 'is_in_reserve')
