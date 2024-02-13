@@ -163,12 +163,13 @@ class Exemplary(metaclass=PoolMeta):
     @fields.depends('shelf', 'is_available', 'is_in_reserve')
     def on_change_with_status(self, name=None):
         status = Status.UNDEFINED
-        if self.shelf is not None:
-            status = Status.IN_SHELF
-        if self.shelf is None and self.is_available is False:
+        if self.is_available is True:
+            if self.shelf is None:
+                status = Status.IN_RESERVE
+            else:
+                status = Status.IN_SHELF
+        elif self.is_available is False:
             status = Status.BORROWED
-        if self.is_in_reserve is True:
-            status = Status.IN_RESERVE
         return status.value
 
     def getter_room(self, name):

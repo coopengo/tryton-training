@@ -205,13 +205,9 @@ class Borrow(metaclass=PoolMeta):
 
     def transition_borrow(self):
         exemplaries = self.select_books.exemplaries
-        Exemplary = Pool().get('library.book.exemplary')
-
         for exemplary in exemplaries:
             if exemplary.is_in_reserve:
                 self.raise_user_error('in_reserve', {'exemplary': exemplary.rec_name})
 
         next_state = super().transition_borrow()
-
-        Exemplary.write(list(exemplaries), {'shelf': None})
         return next_state
