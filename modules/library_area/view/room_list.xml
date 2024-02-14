@@ -2,4 +2,5 @@
 <tree>
     <field name="floor"/>
     <field name="name"/>
+    <field name="number_of_exemplaries"/>
 </tree>

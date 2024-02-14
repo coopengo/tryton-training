@@ -51,6 +51,8 @@ class Room(ModelSQL, ModelView):
     floor = fields.Many2One('library.floor', 'Floor', required=True, ondelete='CASCADE')
     shelves = fields.One2Many('library.shelf', 'room', 'Shelves')
     name = fields.Char('Name', required=True, help='Name of the room')
+    number_of_exemplaries = fields.Function(fields.Integer('Number of exemplaries'),
+                                            'getter_number_of_exemplaries')
 
     @classmethod
     def __setup__(cls):
@@ -60,6 +62,21 @@ class Room(ModelSQL, ModelView):
             ('name_uniq', Unique(t, t.floor, t.name),
                 'The room must be unique in its floor!'),
             ]
+
+    @classmethod
+    def getter_number_of_exemplaries(cls, rooms, name):
+        result = {x.id: 0 for x in rooms}
+        room = Pool().get('library.room').__table__()
+        shelf = Pool().get('library.shelf').__table__()
+        exemplary = Pool().get('library.book.exemplary').__table__()
+        cursor = Transaction().connection.cursor()
+        cursor.execute(*room
+                       .join(shelf, condition=(room.id == shelf.room))
+                       .join(exemplary, condition=(shelf.id == exemplary.shelf))
+                       .select(room.id, Count(exemplary.id), group_by=[room.id]))
+        for room_id, count in cursor.fetchall():
+            result[room_id] = count
+        return result
 
 
 class Shelf(ModelSQL, ModelView):
