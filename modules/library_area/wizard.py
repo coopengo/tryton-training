@@ -245,6 +245,7 @@ class Borrow(metaclass=PoolMeta):
         super().__setup__()
         cls._error_messages.update({
                 'in_reserve': 'Exemplary %(exemplary)s is currently in reserve and unavailable for checkout',
+                'in_quarantine': 'Exemplary %(exemplary)s is currently in quarantine and unavailable for checkout',
                 })
 
     def transition_borrow(self):
@@ -252,6 +253,8 @@ class Borrow(metaclass=PoolMeta):
         for exemplary in exemplaries:
             if exemplary.is_in_reserve:
                 self.raise_user_error('in_reserve', {'exemplary': exemplary.rec_name})
+            elif exemplary.is_in_quarantine:
+                self.raise_user_error('in_quarantine', {'exemplary': exemplary.rec_name})
 
         next_state = super().transition_borrow()
         return next_state
