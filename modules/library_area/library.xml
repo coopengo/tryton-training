@@ -55,7 +55,7 @@
             <field name="view" ref="room_view_form"/>
             <field name="act_window" ref="act_room"/>
         </record>
-        <menuitem parent="library.menu_library" sequence="50" action="act_room" id="menu_room"/>
+        <menuitem parent="library.menu_library_configuration" sequence="3" action="act_room" id="menu_room"/>
         <!-- ######### -->
         <!-- # Shelf # -->
         <!-- ######### -->
