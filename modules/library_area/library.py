@@ -54,7 +54,7 @@ class Room(ModelSQL, ModelView):
     name = fields.Char('Name', required=True, help='Name of the room')
     number_of_exemplaries = fields.Function(
         fields.Integer('Number of exemplaries'),
-        'getter_number_of_exemplaries')
+        getter='getter_number_of_exemplaries')
 
     @classmethod
     def __setup__(cls):
@@ -90,11 +90,11 @@ class Shelf(ModelSQL, ModelView):
         'Exemplaries')
     floor = fields.Function(
         fields.Many2One('library.floor', 'Floor'),
-        'getter_floor')
+        getter='getter_floor')
     name = fields.Char('Name', required=True, help='Name of the shelf')
     number_of_exemplaries = fields.Function(
         fields.Integer('Number of exemplaries'),
-        'getter_number_of_exemplaries')
+        getter='getter_number_of_exemplaries')
 
     @classmethod
     def __setup__(cls):
@@ -133,7 +133,7 @@ class Book(metaclass=PoolMeta):
     is_in_reserve = fields.Function(
         fields.Boolean('In reserve',
             help='If True, this book as at least one exemplary in reserve'),
-        'getter_is_in_reserve', searcher='search_is_in_reserve')
+        getter='getter_is_in_reserve', searcher='search_is_in_reserve')
 
     @classmethod
     def default_exemplaries(cls):
@@ -182,26 +182,27 @@ class Exemplary(metaclass=PoolMeta):
     shelf = fields.Many2One('library.shelf', 'Shelf', ondelete='SET NULL',
         select=True)
     room = fields.Function(
-        fields.Many2One('library.room', 'Room', select=True), 'getter_room')
+        fields.Many2One('library.room', 'Room', select=True),
+        getter='getter_room')
     floor = fields.Function(
         fields.Many2One('library.floor', 'Floor', select=True),
-        'getter_floor')
+        getter='getter_floor')
     is_in_reserve = fields.Function(
         fields.Boolean('In reserve',
             help='If True, this exemplary is in reserve'),
-        'getter_is_in_reserve', searcher='search_is_in_reserve')
+        getter='getter_is_in_reserve', searcher='search_is_in_reserve')
     in_quarantine_date = fields.Date('In quarantine date',
         help='The date on which the exemplary entered in quarantine')
     out_quarantine_date = fields.Function(
         fields.Date('Out quarantine date',
             help='The date on which the book may be released from quarantine'),
-        'on_change_with_out_quarantine_date',
+        getter='on_change_with_out_quarantine_date',
         searcher='search_out_quarantine_date'
     )
     is_in_quarantine = fields.Function(
         fields.Boolean('In quarantine',
             help='If True, this exemplary is in quarantine'),
-        'getter_is_in_quarantine', searcher='search_is_in_quarantine')
+        getter='getter_is_in_quarantine', searcher='search_is_in_quarantine')
 
     status = fields.Function(
         fields.Selection([
@@ -211,7 +212,7 @@ class Exemplary(metaclass=PoolMeta):
                 (Status.UNDEFINED.value, 'UNDEFINED'),
                 (Status.IN_QUARANTINE.value, 'IN QUARANTINE')],
             'Status', readonly=True, select=True),
-        'on_change_with_status')
+        getter='on_change_with_status')
 
     @fields.depends('shelf', 'is_available', 'is_in_reserve')
     def on_change_with_status(self, name=None):
