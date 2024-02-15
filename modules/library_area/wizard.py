@@ -38,13 +38,13 @@ class MoveExemplaries(Wizard):
         super().__setup__()
         cls._error_messages.update({
             'no_exemplary': 'You have to select at least one exemplary to '
-                'move to a shelf',
+            'move to a shelf',
             'unavailable_moved_exemplary': 'You cannot move an '
-                'unavailable exemplary',
+            'unavailable exemplary',
             'no_shelf_specified': 'You must specify a shelf to move '
-                                  'exemplaries',
+            'exemplaries',
             'quarantined_exemplary': 'Exemplary %(exemplary)s is currently '
-                                     'in quarantine so it cannot be moved'
+            'in quarantine so it cannot be moved'
         })
 
     def transition_check_availability(self):
@@ -150,11 +150,11 @@ class ExitQuarantine(Wizard):
         super().__setup__()
         cls._error_messages.update({
             'invalid_model': 'This action should be started from an '
-                'exemplary',
+            'exemplary',
             'not_in_quarantine': 'Exemplary %(exemplary)s is not currently '
-                'in quarantine',
+            'in quarantine',
             'must_stay_in_quarantine': 'Exemplary %(exemplary)s must stay in '
-                'quarantine until %(out_quarantine_date)s',
+            'quarantine until %(out_quarantine_date)s',
         })
 
     def transition_exit_quarantine(self):
@@ -170,10 +170,9 @@ class ExitQuarantine(Wizard):
                 self.raise_user_error('not_in_quarantine',
                     {'exemplary': exemplary.rec_name})
             if exemplary.out_quarantine_date > today:
-                self.raise_user_error('must_stay_in_quarantine',
-                                      {'exemplary': exemplary.rec_name,
-                                       'out_quarantine_date':
-                                           exemplary.out_quarantine_date})
+                self.raise_user_error('must_stay_in_quarantine', {
+                    'exemplary': exemplary.rec_name,
+                    'out_quarantine_date': exemplary.out_quarantine_date})
         Exemplary.write(list(exemplaries), {'in_quarantine_date': None})
         return 'end'
 
@@ -189,7 +188,7 @@ class CreateExemplaries(metaclass=PoolMeta):
         super().__setup__()
         cls._error_messages.update({
             'no_shelf_specified': 'You must specify a shelf for exemplaries '
-                                  'that will not be moved to the reserve'
+            'that will not be moved to the reserve'
         })
 
     def transition_create_exemplaries(self):
@@ -216,25 +215,20 @@ class CreateExemplariesParameters(metaclass=PoolMeta):
     __name__ = 'library.book.create_exemplaries.parameters'
 
     floor = fields.Many2One('library.floor', 'Floor')
-    room = fields.Many2One('library.room', 'Room',
-                           domain=[If(
-                               Bool(Eval('floor')),
-                               ('floor', '=', Eval('floor')),
-                               ('id', '=', None)
-                           )], depends=['floor'])
-    shelf = fields.Many2One('library.shelf', 'Shelf',
-                            domain=[If(
-                                Bool(Eval('room')),
-                                ('room', '=', Eval('room')),
-                                ('id', '=', None)
-                            )], depends=['room'])
+    room = fields.Many2One('library.room', 'Room', domain=[If(
+                Bool(Eval('floor')),
+                ('floor', '=', Eval('floor')),
+                ('id', '=', None))], depends=['floor'])
+    shelf = fields.Many2One('library.shelf', 'Shelf', domain=[If(
+                Bool(Eval('room')),
+                ('room', '=', Eval('room')),
+                ('id', '=', None))], depends=['room'])
     number_to_reserve = fields.Integer(
-        'Number to move to reserve',
-        domain=[
+        'Number to move to reserve', domain=[
             ('number_to_reserve', '>=', 0),
-            ('number_to_reserve', '<=', Eval('number_of_exemplaries'))
-        ], depends=['number_of_exemplaries'], help='Number of new exemplaries'
-                                                   ' to move to the reserve'
+            ('number_to_reserve', '<=', Eval('number_of_exemplaries'))],
+        depends=['number_of_exemplaries'],
+        help='Number of new exemplaries to move to the reserve'
     )
 
     @fields.depends('floor')
@@ -256,20 +250,20 @@ class Borrow(metaclass=PoolMeta):
         super().__setup__()
         cls._error_messages.update({
             'in_reserve': 'Exemplary %(exemplary)s is currently in '
-                'reserve and unavailable for checkout',
+            'reserve and unavailable for checkout',
             'in_quarantine': 'Exemplary %(exemplary)s is currently in '
-                'quarantine and unavailable for checkout',
+            'quarantine and unavailable for checkout',
         })
 
     def transition_borrow(self):
         exemplaries = self.select_books.exemplaries
         for exemplary in exemplaries:
             if exemplary.is_in_reserve:
-                self.raise_user_error('in_reserve',
-                    {'exemplary': exemplary.rec_name})
+                self.raise_user_error('in_reserve', {
+                        'exemplary': exemplary.rec_name})
             elif exemplary.is_in_quarantine:
-                self.raise_user_error('in_quarantine',
-                    {'exemplary': exemplary.rec_name})
+                self.raise_user_error('in_quarantine', {
+                        'exemplary': exemplary.rec_name})
 
         next_state = super().transition_borrow()
         return next_state
@@ -283,6 +277,6 @@ class Return(metaclass=PoolMeta):
         checkouts = self.select_checkouts.checkouts
         exemplaries = [c.exemplary for c in checkouts]
         Exemplary = Pool().get('library.book.exemplary')
-        Exemplary.write(list(exemplaries), {'in_quarantine_date':
-                self.select_checkouts.date})
+        Exemplary.write(list(exemplaries), {
+                'in_quarantine_date': self.select_checkouts.date})
         return next_state
