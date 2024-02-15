@@ -72,8 +72,7 @@ class Room(ModelSQL, ModelView):
         shelf = Pool().get('library.shelf').__table__()
         exemplary = Pool().get('library.book.exemplary').__table__()
         cursor = Transaction().connection.cursor()
-        cursor.execute(*room
-            .join(shelf, condition=(room.id == shelf.room))
+        cursor.execute(*room.join(shelf, condition=(room.id == shelf.room))
             .join(exemplary, condition=(shelf.id == exemplary.shelf))
             .select(room.id, Count(exemplary.id), group_by=[room.id]))
         for room_id, count in cursor.fetchall():
@@ -89,7 +88,8 @@ class Shelf(ModelSQL, ModelView):
         ondelete='CASCADE')
     exemplaries = fields.One2Many('library.book.exemplary', 'shelf',
         'Exemplaries')
-    floor = fields.Function(fields.Many2One('library.floor', 'Floor'),
+    floor = fields.Function(
+        fields.Many2One('library.floor', 'Floor'),
         'getter_floor')
     name = fields.Char('Name', required=True, help='Name of the shelf')
     number_of_exemplaries = fields.Function(
@@ -130,8 +130,9 @@ class Shelf(ModelSQL, ModelView):
 class Book(metaclass=PoolMeta):
     __name__ = 'library.book'
 
-    is_in_reserve = fields.Function(fields.Boolean('In reserve',
-        help='If True, this book as at least one exemplary in reserve'),
+    is_in_reserve = fields.Function(
+        fields.Boolean('In reserve',
+            help='If True, this book as at least one exemplary in reserve'),
         'getter_is_in_reserve', searcher='search_is_in_reserve')
 
     @classmethod
@@ -185,9 +186,10 @@ class Exemplary(metaclass=PoolMeta):
     floor = fields.Function(
         fields.Many2One('library.floor', 'Floor', select=True),
         'getter_floor')
-    is_in_reserve = fields.Function(fields.Boolean('In reserve',
+    is_in_reserve = fields.Function(
+        fields.Boolean('In reserve',
             help='If True, this exemplary is in reserve'),
-            'getter_is_in_reserve', searcher='search_is_in_reserve')
+        'getter_is_in_reserve', searcher='search_is_in_reserve')
     in_quarantine_date = fields.Date('In quarantine date',
         help='The date on which the exemplary entered in quarantine')
     out_quarantine_date = fields.Function(
@@ -196,17 +198,19 @@ class Exemplary(metaclass=PoolMeta):
         'on_change_with_out_quarantine_date',
         searcher='search_out_quarantine_date'
     )
-    is_in_quarantine = fields.Function(fields.Boolean('In quarantine',
+    is_in_quarantine = fields.Function(
+        fields.Boolean('In quarantine',
             help='If True, this exemplary is in quarantine'),
-            'getter_is_in_quarantine', searcher='search_is_in_quarantine')
+        'getter_is_in_quarantine', searcher='search_is_in_quarantine')
 
-    status = fields.Function(fields.Selection([
-        (Status.IN_RESERVE.value, 'IN RESERVE'),
-        (Status.IN_SHELF.value, 'IN SHELF'),
-        (Status.BORROWED.value, 'BORROWED'),
-        (Status.UNDEFINED.value, 'UNDEFINED'),
-        (Status.IN_QUARANTINE.value, 'IN QUARANTINE')],
-        'Status', readonly=True, select=True),
+    status = fields.Function(
+        fields.Selection([
+                (Status.IN_RESERVE.value, 'IN RESERVE'),
+                (Status.IN_SHELF.value, 'IN SHELF'),
+                (Status.BORROWED.value, 'BORROWED'),
+                (Status.UNDEFINED.value, 'UNDEFINED'),
+                (Status.IN_QUARANTINE.value, 'IN QUARANTINE')],
+            'Status', readonly=True, select=True),
         'on_change_with_status')
 
     @fields.depends('shelf', 'is_available', 'is_in_reserve')

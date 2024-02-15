@@ -14,7 +14,7 @@ __all__ = [
     'CreateExemplariesParameters',
     'Borrow',
     'Return'
-]
+    ]
 
 
 class MoveExemplaries(Wizard):
@@ -28,8 +28,7 @@ class MoveExemplaries(Wizard):
          'library_area.move_select_shelf_view_form', [
              Button('Cancel', 'end', 'tryton-cancel'),
              Button('Move to reserve', 'move_to_reserve', 'tryton-go-next'),
-             Button('Move', 'move_to_shelf', 'tryton-go-next', default=True)
-         ])
+             Button('Move', 'move_to_shelf', 'tryton-go-next', default=True)])
     move_to_reserve = StateTransition()
     move_to_shelf = StateTransition()
 
@@ -57,8 +56,8 @@ class MoveExemplaries(Wizard):
             self.raise_user_error('no_exemplary')
         for e in exemplaries:
             if e.is_in_quarantine:
-                self.raise_user_error('quarantined_exemplary',
-                    {'exemplary': e.rec_name})
+                self.raise_user_error('quarantined_exemplary', {
+                    'exemplary': e.rec_name})
         if not all([x.is_available for x in exemplaries]):
             self.raise_user_error('unavailable_moved_exemplary')
         return 'select_shelf'
@@ -154,8 +153,7 @@ class ExitQuarantine(Wizard):
             'not_in_quarantine': 'Exemplary %(exemplary)s is not currently '
             'in quarantine',
             'must_stay_in_quarantine': 'Exemplary %(exemplary)s must stay in '
-            'quarantine until %(out_quarantine_date)s',
-        })
+            'quarantine until %(out_quarantine_date)s'})
 
     def transition_exit_quarantine(self):
         today = date.today()
