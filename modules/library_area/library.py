@@ -48,11 +48,13 @@ class Room(ModelSQL, ModelView):
     'Room'
     __name__ = 'library.room'
 
-    floor = fields.Many2One('library.floor', 'Floor', required=True, ondelete='CASCADE')
+    floor = fields.Many2One('library.floor', 'Floor', required=True,
+        ondelete='CASCADE')
     shelves = fields.One2Many('library.shelf', 'room', 'Shelves')
     name = fields.Char('Name', required=True, help='Name of the room')
-    number_of_exemplaries = fields.Function(fields.Integer('Number of exemplaries'),
-                                            'getter_number_of_exemplaries')
+    number_of_exemplaries = fields.Function(
+        fields.Integer('Number of exemplaries'),
+        'getter_number_of_exemplaries')
 
     @classmethod
     def __setup__(cls):
@@ -71,9 +73,9 @@ class Room(ModelSQL, ModelView):
         exemplary = Pool().get('library.book.exemplary').__table__()
         cursor = Transaction().connection.cursor()
         cursor.execute(*room
-                       .join(shelf, condition=(room.id == shelf.room))
-                       .join(exemplary, condition=(shelf.id == exemplary.shelf))
-                       .select(room.id, Count(exemplary.id), group_by=[room.id]))
+            .join(shelf, condition=(room.id == shelf.room))
+            .join(exemplary, condition=(shelf.id == exemplary.shelf))
+            .select(room.id, Count(exemplary.id), group_by=[room.id]))
         for room_id, count in cursor.fetchall():
             result[room_id] = count
         return result
@@ -83,13 +85,16 @@ class Shelf(ModelSQL, ModelView):
     'Shelf'
     __name__ = 'library.shelf'
 
-    room = fields.Many2One('library.room', 'Room', required=True, ondelete='CASCADE')
-    exemplaries = fields.One2Many('library.book.exemplary', 'shelf', 'Exemplaries')
+    room = fields.Many2One('library.room', 'Room', required=True,
+        ondelete='CASCADE')
+    exemplaries = fields.One2Many('library.book.exemplary', 'shelf',
+        'Exemplaries')
     floor = fields.Function(fields.Many2One('library.floor', 'Floor'),
-                            'getter_floor')
+        'getter_floor')
     name = fields.Char('Name', required=True, help='Name of the shelf')
-    number_of_exemplaries = fields.Function(fields.Integer('Number of exemplaries'),
-                                            'getter_number_of_exemplaries')
+    number_of_exemplaries = fields.Function(
+        fields.Integer('Number of exemplaries'),
+        'getter_number_of_exemplaries')
 
     @classmethod
     def __setup__(cls):
@@ -125,12 +130,13 @@ class Shelf(ModelSQL, ModelView):
 class Book(metaclass=PoolMeta):
     __name__ = 'library.book'
 
-    is_in_reserve = fields.Function(fields.Boolean('In reserve', help='If True, this book as at least one exemplary in reserve'),
-                                    'getter_is_in_reserve', searcher='search_is_in_reserve')
+    is_in_reserve = fields.Function(fields.Boolean('In reserve',
+        help='If True, this book as at least one exemplary in reserve'),
+        'getter_is_in_reserve', searcher='search_is_in_reserve')
 
     @classmethod
     def default_exemplaries(cls):
-        return []  # needed to avoid default creation of one exemplary with no identifier
+        return []  # needed to avoid default creation of one exemplary
 
     @classmethod
     def getter_is_in_reserve(cls, books, name):
@@ -141,9 +147,12 @@ class Book(metaclass=PoolMeta):
         result = {x.id: False for x in books}
         cursor = Transaction().connection.cursor()
         cursor.execute(*book
-                       .join(exemplary, condition=(exemplary.book == book.id))
-                       .join(checkout, 'LEFT OUTER', condition=(exemplary.id == checkout.exemplary))
-                       .select(book.id, where=((checkout.return_date != Null) | (checkout.id == Null)) & (exemplary.shelf == Null)))
+            .join(exemplary, condition=(exemplary.book == book.id))
+            .join(checkout, 'LEFT OUTER',
+                  condition=(exemplary.id == checkout.exemplary))
+            .select(book.id, where=(
+                    (checkout.return_date != Null) | (checkout.id == Null))
+                    & (exemplary.shelf == Null)))
         for book_id, in cursor.fetchall():
             result[book_id] = True
         return result
@@ -158,29 +167,38 @@ class Book(metaclass=PoolMeta):
         exemplary = pool.get('library.book.exemplary').__table__()
         book = cls.__table__()
         query = (book.join(exemplary, condition=(exemplary.book == book.id))
-                 .join(checkout, 'LEFT OUTER', condition=(exemplary.id == checkout.exemplary))
-                 .select(book.id, where=((checkout.return_date != Null) | (checkout.id == Null)) & (exemplary.shelf == Null)))
+                .join(checkout, 'LEFT OUTER',
+                    condition=(exemplary.id == checkout.exemplary))
+                .select(book.id, where=(
+                        (checkout.return_date != Null)
+                        | (checkout.id == Null)) & (exemplary.shelf == Null)))
         return [('id', 'in' if value else 'not in', query)]
 
 
 class Exemplary(metaclass=PoolMeta):
     __name__ = 'library.book.exemplary'
 
-    shelf = fields.Many2One('library.shelf', 'Shelf', ondelete='SET NULL', select=True)  # exemplaries are moved to reserve if shelf is deleted
-    room = fields.Function(fields.Many2One('library.room', 'Room', select=True),
-                           'getter_room')
-    floor = fields.Function(fields.Many2One('library.floor', 'Floor', select=True),
-                            'getter_floor')
-    is_in_reserve = fields.Function(fields.Boolean('In reserve', help='If True, this exemplary is in reserve'),
-                                    'getter_is_in_reserve', searcher='search_is_in_reserve')
-
-    in_quarantine_date = fields.Date('In quarantine date', help='The date on which the exemplary entered in quarantine')
+    shelf = fields.Many2One('library.shelf', 'Shelf', ondelete='SET NULL',
+        select=True)
+    room = fields.Function(
+        fields.Many2One('library.room', 'Room', select=True), 'getter_room')
+    floor = fields.Function(
+        fields.Many2One('library.floor', 'Floor', select=True),
+        'getter_floor')
+    is_in_reserve = fields.Function(fields.Boolean('In reserve',
+            help='If True, this exemplary is in reserve'),
+            'getter_is_in_reserve', searcher='search_is_in_reserve')
+    in_quarantine_date = fields.Date('In quarantine date',
+        help='The date on which the exemplary entered in quarantine')
     out_quarantine_date = fields.Function(
-        fields.Date('Out quarantine date', help='The date on which the book may be released from quarantine'),
-        'on_change_with_out_quarantine_date', searcher='search_out_quarantine_date'
+        fields.Date('Out quarantine date',
+            help='The date on which the book may be released from quarantine'),
+        'on_change_with_out_quarantine_date',
+        searcher='search_out_quarantine_date'
     )
-    is_in_quarantine = fields.Function(fields.Boolean('In quarantine', help='If True, this exemplary is in quarantine'),
-                                    'getter_is_in_quarantine', searcher='search_is_in_quarantine')
+    is_in_quarantine = fields.Function(fields.Boolean('In quarantine',
+            help='If True, this exemplary is in quarantine'),
+            'getter_is_in_quarantine', searcher='search_is_in_quarantine')
 
     status = fields.Function(fields.Selection([
         (Status.IN_RESERVE.value, 'IN RESERVE'),
@@ -225,8 +243,11 @@ class Exemplary(metaclass=PoolMeta):
         result = {x.id: False for x in exemplaries}
         cursor = Transaction().connection.cursor()
         cursor.execute(*exemplary
-                       .join(checkout, 'LEFT OUTER', condition=(exemplary.id == checkout.exemplary))
-                       .select(exemplary.id, where=((checkout.return_date != Null) | (checkout.id == Null)) & (exemplary.shelf == Null)))
+            .join(checkout, 'LEFT OUTER',
+                condition=(exemplary.id == checkout.exemplary))
+            .select(exemplary.id, where=(
+                    (checkout.return_date != Null) | (checkout.id == Null))
+                    & (exemplary.shelf == Null)))
         for exemplary_id, in cursor.fetchall():
             result[exemplary_id] = True
         return result
@@ -240,8 +261,11 @@ class Exemplary(metaclass=PoolMeta):
         checkout = pool.get('library.user.checkout').__table__()
         exemplary = cls.__table__()
         query = (exemplary
-                 .join(checkout, 'LEFT OUTER', condition=(exemplary.id == checkout.exemplary))
-                 .select(exemplary.id, where=((checkout.return_date != Null) | (checkout.id == Null)) & (exemplary.shelf == Null)))
+            .join(checkout, 'LEFT OUTER',
+                condition=(exemplary.id == checkout.exemplary))
+            .select(exemplary.id, where=(
+                    (checkout.return_date != Null) | (checkout.id == Null))
+                    & (exemplary.shelf == Null)))
         return [('id', 'in' if value else 'not in', query)]
 
     @classmethod
@@ -252,8 +276,11 @@ class Exemplary(metaclass=PoolMeta):
         result = {x.id: False for x in exemplaries}
         cursor = Transaction().connection.cursor()
         cursor.execute(*exemplary
-                       .join(checkout, 'LEFT OUTER', condition=(exemplary.id == checkout.exemplary))
-                       .select(exemplary.id, where=((checkout.return_date != Null) | (checkout.id == Null)) & (exemplary.in_quarantine_date != Null)))
+            .join(checkout, 'LEFT OUTER',
+                condition=(exemplary.id == checkout.exemplary))
+            .select(exemplary.id,
+                where=((checkout.return_date != Null) | (checkout.id == Null))
+                    & (exemplary.in_quarantine_date != Null)))
         for exemplary_id, in cursor.fetchall():
             result[exemplary_id] = True
         return result
@@ -267,8 +294,11 @@ class Exemplary(metaclass=PoolMeta):
         checkout = pool.get('library.user.checkout').__table__()
         exemplary = cls.__table__()
         query = (exemplary
-                 .join(checkout, 'LEFT OUTER', condition=(exemplary.id == checkout.exemplary))
-                 .select(exemplary.id, where=((checkout.return_date != Null) | (checkout.id == Null)) & (exemplary.in_quarantine_date != Null)))
+            .join(checkout, 'LEFT OUTER',
+                condition=(exemplary.id == checkout.exemplary))
+            .select(exemplary.id, where=(
+                    (checkout.return_date != Null) | (checkout.id == Null))
+                    & (exemplary.in_quarantine_date != Null)))
         return [('id', 'in' if value else 'not in', query)]
 
     @classmethod
@@ -278,7 +308,8 @@ class Exemplary(metaclass=PoolMeta):
         if isinstance(value, datetime.date):
             value = value + datetime.timedelta(days=-7)
         if isinstance(value, (list, tuple)):
-            value = [(x + datetime.timedelta(days=-7) if x else x) for x in value]
+            value = [(x + datetime.timedelta(days=-7) if x else x)
+                     for x in value]
         Operator = SQL_OPERATORS[operator]
         query = exemplary.select(exemplary.id,
             where=Operator(exemplary.in_quarantine_date, value))
