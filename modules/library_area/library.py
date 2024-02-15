@@ -258,22 +258,6 @@ class Exemplary(metaclass=PoolMeta):
         return result
 
     @classmethod
-    def search_is_in_reserve(cls, name, clause):
-        _, operator, value = clause
-        if operator == '!=':
-            value = not value
-        pool = Pool()
-        checkout = pool.get('library.user.checkout').__table__()
-        exemplary = cls.__table__()
-        query = (exemplary
-            .join(checkout, 'LEFT OUTER',
-                condition=(exemplary.id == checkout.exemplary))
-            .select(exemplary.id, where=(
-                    (checkout.return_date != Null) | (checkout.id == Null))
-                    & (exemplary.shelf == Null)))
-        return [('id', 'in' if value else 'not in', query)]
-
-    @classmethod
     def getter_is_in_quarantine(cls, exemplaries, name):
         pool = Pool()
         checkout = pool.get('library.user.checkout').__table__()
@@ -289,6 +273,22 @@ class Exemplary(metaclass=PoolMeta):
         for exemplary_id, in cursor.fetchall():
             result[exemplary_id] = True
         return result
+
+    @classmethod
+    def search_is_in_reserve(cls, name, clause):
+        _, operator, value = clause
+        if operator == '!=':
+            value = not value
+        pool = Pool()
+        checkout = pool.get('library.user.checkout').__table__()
+        exemplary = cls.__table__()
+        query = (exemplary
+            .join(checkout, 'LEFT OUTER',
+                condition=(exemplary.id == checkout.exemplary))
+            .select(exemplary.id, where=(
+                    (checkout.return_date != Null) | (checkout.id == Null))
+                    & (exemplary.shelf == Null)))
+        return [('id', 'in' if value else 'not in', query)]
 
     @classmethod
     def search_is_in_quarantine(cls, name, clause):
