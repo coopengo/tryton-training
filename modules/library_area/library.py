@@ -1,10 +1,12 @@
 import datetime
-from datetime import timedelta
 
 from sql import Null
 from sql.aggregate import Count
+
 from trytond.model import ModelSQL, fields, ModelView, Unique
-from enum import Enum
+from trytond.model.fields import SQL_OPERATORS
+from trytond.pool import PoolMeta, Pool
+from trytond.transaction import Transaction
 
 __all__ = [
     'Floor',
@@ -14,17 +16,19 @@ __all__ = [
     'Exemplary'
     ]
 
-from trytond.model.fields import SQL_OPERATORS
-from trytond.pool import PoolMeta, Pool
-from trytond.transaction import Transaction
+BOOK_STATUS_UNDEFINED = 'undefined'
+BOOK_STATUS_IN_RESERVE = 'in_reserve'
+BOOK_STATUS_IN_SHELF = 'in_shelf'
+BOOK_STATUS_BORROWED = 'borrowed'
+BOOK_STATUS_IN_QUARANTINE = 'in_quarantine'
 
-
-class Status(Enum):
-    UNDEFINED = 'undefined'
-    IN_RESERVE = 'in_reserve'
-    IN_SHELF = 'in_shelf'
-    BORROWED = 'borrowed'
-    IN_QUARANTINE = 'in_quarantine'
+BOOK_STATUSES = [
+    (BOOK_STATUS_UNDEFINED, 'UNDEFINED'),
+    (BOOK_STATUS_IN_RESERVE, 'IN RESERVE'),
+    (BOOK_STATUS_IN_SHELF, 'IN SHELF'),
+    (BOOK_STATUS_BORROWED, 'BORROWED'),
+    (BOOK_STATUS_IN_QUARANTINE, 'IN QUARANTINE')
+    ]
 
 
 class Floor(ModelSQL, ModelView):
@@ -205,34 +209,28 @@ class Exemplary(metaclass=PoolMeta):
         getter='getter_is_in_quarantine', searcher='search_is_in_quarantine')
 
     status = fields.Function(
-        fields.Selection([
-                (Status.IN_RESERVE.value, 'IN RESERVE'),
-                (Status.IN_SHELF.value, 'IN SHELF'),
-                (Status.BORROWED.value, 'BORROWED'),
-                (Status.UNDEFINED.value, 'UNDEFINED'),
-                (Status.IN_QUARANTINE.value, 'IN QUARANTINE')],
-            'Status', readonly=True, select=True),
+        fields.Selection(BOOK_STATUSES, 'Status', readonly=True, select=True),
         getter='on_change_with_status')
 
     @fields.depends('shelf', 'is_available', 'is_in_reserve')
     def on_change_with_status(self, name=None):
-        status = Status.UNDEFINED
+        status = BOOK_STATUS_UNDEFINED
         if self.is_in_quarantine:
-            status = Status.IN_QUARANTINE
+            status = BOOK_STATUS_IN_QUARANTINE
         elif self.is_available is True:
             if self.is_in_reserve:
-                status = Status.IN_RESERVE
+                status = BOOK_STATUS_IN_RESERVE
             else:
-                status = Status.IN_SHELF
+                status = BOOK_STATUS_IN_SHELF
         elif self.is_available is False:
-            status = Status.BORROWED
-        return status.value
+            status = BOOK_STATUS_BORROWED
+        return status
 
     @fields.depends('in_quarantine_date')
     def on_change_with_out_quarantine_date(self, name=None):
         if self.in_quarantine_date is None:
             return None
-        return self.in_quarantine_date + timedelta(days=7)
+        return self.in_quarantine_date + datetime.timedelta(days=7)
 
     def getter_room(self, name):
         return self.shelf.room.id if self.shelf and self.shelf.room else None
