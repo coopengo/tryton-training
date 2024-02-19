@@ -36,15 +36,15 @@ class MoveExemplaries(Wizard):
     def __setup__(cls):
         super().__setup__()
         cls._error_messages.update({
-            'no_exemplary': 'You have to select at least one exemplary to '
-            'move to a shelf',
-            'unavailable_moved_exemplary': 'You cannot move an '
-            'unavailable exemplary',
-            'no_shelf_specified': 'You must specify a shelf to move '
-            'exemplaries',
-            'quarantined_exemplary': 'Exemplary %(exemplary)s is currently '
-            'in quarantine so it cannot be moved'
-        })
+                'no_exemplary': 'You have to select at least one exemplary to '
+                'move to a shelf',
+                'unavailable_moved_exemplary': 'You cannot move an '
+                'unavailable exemplary',
+                'no_shelf_specified': 'You must specify a shelf to move '
+                'exemplaries',
+                'quarantined_exemplary': 'Exemplary %(exemplary)s is currently '
+                'in quarantine so it cannot be moved'
+                })
 
     def transition_check_availability(self):
         if (Transaction().context.get('active_model', '')
@@ -57,7 +57,7 @@ class MoveExemplaries(Wizard):
         for e in exemplaries:
             if e.is_in_quarantine:
                 self.raise_user_error('quarantined_exemplary', {
-                    'exemplary': e.rec_name})
+                        'exemplary': e.rec_name})
         if not all([x.is_available for x in exemplaries]):
             self.raise_user_error('unavailable_moved_exemplary')
         return 'select_shelf'
@@ -96,12 +96,13 @@ class MoveExemplariesSelectShelf(ModelView):
     __name__ = 'library.book.examplary.move.select_shelf'
 
     floor = fields.Many2One('library.floor', 'Floor')
-    room = fields.Many2One('library.room', 'Room', domain=[If(
-        Bool(Eval('floor')), ('floor', '=', Eval('floor')),
-        ('id', '=', None))], depends=['floor'])
-    shelf = fields.Many2One('library.shelf', 'Shelf', domain=[If(
-        Bool(Eval('room')), ('room', '=', Eval('room')), ('id', '=', None))],
-            depends=['room'])
+    room = fields.Many2One('library.room', 'Room', domain=[
+            If(Bool(Eval('floor')), ('floor', '=', Eval('floor')),
+            ('id', '=', None))], depends=['floor'])
+    shelf = fields.Many2One('library.shelf', 'Shelf',
+        domain=[If(Bool(Eval('room')), ('room', '=', Eval('room')),
+            ('id', '=', None))],
+        depends=['room'])
     selected_exemplaries = fields.Many2Many('library.book.exemplary', None,
         None, 'Selected exemplaries', readonly=True)
     before_number_of_exemplaries = fields.Integer('In shelf before',
@@ -148,12 +149,13 @@ class ExitQuarantine(Wizard):
     def __setup__(cls):
         super().__setup__()
         cls._error_messages.update({
-            'invalid_model': 'This action should be started from an '
-            'exemplary',
-            'not_in_quarantine': 'Exemplary %(exemplary)s is not currently '
-            'in quarantine',
-            'must_stay_in_quarantine': 'Exemplary %(exemplary)s must stay in '
-            'quarantine until %(out_quarantine_date)s'})
+                'invalid_model': 'This action should be started from an '
+                'exemplary',
+                'not_in_quarantine': 'Exemplary %(exemplary)s is not currently '
+                'in quarantine',
+                'must_stay_in_quarantine': 'Exemplary %(exemplary)s must stay in '
+                'quarantine until %(out_quarantine_date)s'
+                })
 
     def transition_exit_quarantine(self):
         today = date.today()
@@ -185,9 +187,9 @@ class CreateExemplaries(metaclass=PoolMeta):
     def __setup__(cls):
         super().__setup__()
         cls._error_messages.update({
-            'no_shelf_specified': 'You must specify a shelf for exemplaries '
-            'that will not be moved to the reserve'
-        })
+                'no_shelf_specified': 'You must specify a shelf for exemplaries '
+                'that will not be moved to the reserve'
+                })
 
     def transition_create_exemplaries(self):
         next_state = super().transition_create_exemplaries()
@@ -213,17 +215,16 @@ class CreateExemplariesParameters(metaclass=PoolMeta):
     __name__ = 'library.book.create_exemplaries.parameters'
 
     floor = fields.Many2One('library.floor', 'Floor')
-    room = fields.Many2One('library.room', 'Room', domain=[If(
-                Bool(Eval('floor')),
-                ('floor', '=', Eval('floor')),
-                ('id', '=', None))], depends=['floor'])
-    shelf = fields.Many2One('library.shelf', 'Shelf', domain=[If(
-                Bool(Eval('room')),
-                ('room', '=', Eval('room')),
-                ('id', '=', None))], depends=['room'])
-    number_to_reserve = fields.Integer(
-        'Number to move to reserve', domain=[
-            ('number_to_reserve', '>=', 0),
+    room = fields.Many2One('library.room', 'Room', domain=[
+            If(Bool(Eval('floor')),
+            ('floor', '=', Eval('floor')),
+            ('id', '=', None))], depends=['floor'])
+    shelf = fields.Many2One('library.shelf', 'Shelf', domain=[
+            If(Bool(Eval('room')),
+            ('room', '=', Eval('room')),
+            ('id', '=', None))], depends=['room'])
+    number_to_reserve = fields.Integer('Number to move to reserve',
+        domain=[('number_to_reserve', '>=', 0),
             ('number_to_reserve', '<=', Eval('number_of_exemplaries'))],
         depends=['number_of_exemplaries'],
         help='Number of new exemplaries to move to the reserve'
@@ -247,11 +248,11 @@ class Borrow(metaclass=PoolMeta):
     def __setup__(cls):
         super().__setup__()
         cls._error_messages.update({
-            'in_reserve': 'Exemplary %(exemplary)s is currently in '
-            'reserve and unavailable for checkout',
-            'in_quarantine': 'Exemplary %(exemplary)s is currently in '
-            'quarantine and unavailable for checkout',
-        })
+                'in_reserve': 'Exemplary %(exemplary)s is currently in '
+                'reserve and unavailable for checkout',
+                'in_quarantine': 'Exemplary %(exemplary)s is currently in '
+                'quarantine and unavailable for checkout',
+                })
 
     def transition_borrow(self):
         exemplaries = self.select_books.exemplaries
