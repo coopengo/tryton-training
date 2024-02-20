@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<tree>
+    <field name="floor"/>
+    <field name="room"/>
+    <field name="name"/>
+    <field name="number_of_exemplaries"/>
+</tree>

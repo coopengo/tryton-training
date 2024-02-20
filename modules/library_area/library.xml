@@ -1,0 +1,218 @@
+<?xml version="1.0"?>
+<tryton>
+    <data>
+        <!-- ######### -->
+        <!-- # Floor # -->
+        <!-- ######### -->
+        <record model="ir.ui.view" id="floor_view_form">
+            <field name="model">library.floor</field>
+            <field name="type">form</field>
+            <field name="name">floor_form</field>
+        </record>
+        <record model="ir.ui.view" id="floor_view_list">
+            <field name="model">library.floor</field>
+            <field name="type">tree</field>
+            <field name="name">floor_list</field>
+        </record>
+        <record model="ir.action.act_window" id="act_floor">
+            <field name="name">Floors</field>
+            <field name="res_model">library.floor</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_floor_view_list">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="floor_view_list"/>
+            <field name="act_window" ref="act_floor"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_floor_view_form">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="floor_view_form"/>
+            <field name="act_window" ref="act_floor"/>
+        </record>
+        <!-- ######## -->
+        <!-- # Room # -->
+        <!-- ######## -->
+        <record model="ir.ui.view" id="room_view_form">
+            <field name="model">library.room</field>
+            <field name="type">form</field>
+            <field name="name">room_form</field>
+        </record>
+        <record model="ir.ui.view" id="room_view_list">
+            <field name="model">library.room</field>
+            <field name="type">tree</field>
+            <field name="name">room_list</field>
+        </record>
+        <record model="ir.action.act_window" id="act_room">
+            <field name="name">Rooms</field>
+            <field name="res_model">library.room</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_room_view_list">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="room_view_list"/>
+            <field name="act_window" ref="act_room"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_room_view_form">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="room_view_form"/>
+            <field name="act_window" ref="act_room"/>
+        </record>
+        <menuitem parent="library.menu_library_configuration" sequence="3" action="act_room" id="menu_room"/>
+        <!-- ######### -->
+        <!-- # Shelf # -->
+        <!-- ######### -->
+        <record model="ir.ui.view" id="shelf_view_form">
+            <field name="model">library.shelf</field>
+            <field name="type">form</field>
+            <field name="name">shelf_form</field>
+        </record>
+        <record model="ir.ui.view" id="shelf_view_list">
+            <field name="model">library.shelf</field>
+            <field name="type">tree</field>
+            <field name="name">shelf_list</field>
+        </record>
+        <record model="ir.action.act_window" id="act_shelf">
+            <field name="name">Shelves</field>
+            <field name="res_model">library.shelf</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_shelf_view_list">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="shelf_view_list"/>
+            <field name="act_window" ref="act_shelf"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_shelf_view_form">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="shelf_view_form"/>
+            <field name="act_window" ref="act_shelf"/>
+        </record>
+        <!-- ######## -->
+        <!-- # Book # -->
+        <!-- ######## -->
+        <record model="ir.ui.view" id="book_view_form">
+            <field name="model">library.book</field>
+            <field name="inherit" ref="library.book_view_form"/>
+            <field name="name">book_form</field>
+        </record>
+        <!-- ############# -->
+        <!-- # Exemplary # -->
+        <!-- ############# -->
+        <record model="ir.ui.view" id="exemplary_view_form">
+            <field name="model">library.book.exemplary</field>
+            <field name="inherit" ref="library.exemplary_view_form"/>
+            <field name="name">exemplary_form</field>
+        </record>
+        <record model="ir.ui.view" id="exemplary_view_list">
+            <field name="model">library.book.exemplary</field>
+            <field name="inherit" ref="library.exemplary_view_list"/>
+            <field name="name">exemplary_list</field>
+        </record>
+        <record model="ir.action.act_window.domain" id="act_exemplary_domain_borrowed">
+            <field name="name">Borrowed</field>
+            <field name="sequence" eval="10"/>
+            <field name="domain" eval="[('is_available', '=', False)]" pyson="1"/>
+            <field name="act_window" ref="library.act_exemplary"/>
+        </record>
+        <record model="ir.action.act_window.domain" id="act_exemplary_domain_in_shelf">
+            <field name="name">In shelf</field>
+            <field name="sequence" eval="20"/>
+            <field name="domain" eval="['AND', [('is_available', '=', True), ('is_in_reserve', '=', False)]]" pyson="1"/>
+            <field name="act_window" ref="library.act_exemplary"/>
+        </record>
+        <record model="ir.action.act_window.domain" id="act_exemplary_domain_in_reserve">
+            <field name="name">In reserve</field>
+            <field name="sequence" eval="20"/>
+            <field name="domain" eval="[('is_in_reserve', '=', True)]" pyson="1"/>
+            <field name="act_window" ref="library.act_exemplary"/>
+        </record>
+        <!-- ########### -->
+        <!-- # Reserve # -->
+        <!-- ########### -->
+        <record model="ir.action.act_window" id="act_reserve">
+            <field name="name">Reserve</field>
+            <field name="res_model">library.book.exemplary</field>
+            <field name="domain" eval="[('is_in_reserve', '=', True)]" pyson="1"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_reserve_view_list">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="library.exemplary_view_list"/>
+            <field name="act_window" ref="act_reserve"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_reserve_view_form">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="library.exemplary_view_form"/>
+            <field name="act_window" ref="act_reserve"/>
+        </record>
+        <menuitem parent="library.menu_library" sequence="60" action="act_reserve" id="menu_reserve"/>
+        <!-- ############## -->
+        <!-- # Quarantine # -->
+        <!-- ############## -->
+        <record model="ir.action.act_window" id="act_quarantine">
+            <field name="name">Quarantine</field>
+            <field name="res_model">library.book.exemplary</field>
+            <field name="domain" eval="[('is_in_quarantine', '=', True)]" pyson="1"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_quarantine_view_list">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="library.exemplary_view_list"/>
+            <field name="act_window" ref="act_quarantine"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_quarantine_view_form">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="library.exemplary_view_form"/>
+            <field name="act_window" ref="act_quarantine"/>
+        </record>
+        <menuitem parent="library.menu_library" sequence="70" action="act_quarantine" id="menu_quarantine"/>
+        <!-- ################### -->
+        <!-- # Late quarantine # -->
+        <!-- ################### -->
+        <record model="ir.action.act_window" id="act_late_quarantine">
+            <field name="name">Late Quarantine</field>
+            <field name="res_model">library.book.exemplary</field>
+            <field name="domain" eval="[('out_quarantine_date', '&lt;', Date())]" pyson="1"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_late_quarantine_view_list">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="library.exemplary_view_list"/>
+            <field name="act_window" ref="act_late_quarantine"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_late_quarantine_view_form">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="library.exemplary_view_form"/>
+            <field name="act_window" ref="act_late_quarantine"/>
+        </record>
+        <menuitem parent="library.menu_library" sequence="80" action="act_late_quarantine" id="menu_late_quarantine"/>
+        <!-- ############# -->
+        <!-- # Relates # -->
+        <!-- ############# -->
+        <!-- Room -> Shelves relate -->
+        <record model="ir.action.act_window" id="act_open_room_shelves">
+            <field name="name">Shelves</field>
+            <field name="res_model">library.shelf</field>
+            <field name="domain" eval="[('room', '=', Eval('active_id'))]" pyson="1"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_open_room_shelves_view1">
+            <field name="sequence" eval="1"/>
+            <field name="view" ref="shelf_view_list"/>
+            <field name="act_window" ref="act_open_room_shelves"/>
+        </record>
+        <record model="ir.action.keyword" id="act_open_room_shelves_keyword">
+            <field name="keyword">form_relate</field>
+            <field name="model">library.room,-1</field>
+            <field name="action" ref="act_open_room_shelves"/>
+        </record>
+        <!-- Shelf -> Exemplaries relate -->
+        <record model="ir.action.act_window" id="act_open_shelf_exemplaries">
+            <field name="name">Exemplaries</field>
+            <field name="res_model">library.book.exemplary</field>
+            <field name="domain" eval="[('shelf', '=', Eval('active_id'))]" pyson="1"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_open_shelf_exemplaries_view1">
+            <field name="sequence" eval="1"/>
+            <field name="view" ref="exemplary_view_list"/>
+            <field name="act_window" ref="act_open_shelf_exemplaries"/>
+        </record>
+        <record model="ir.action.keyword" id="act_open_shelf_exemplaries_keyword">
+            <field name="keyword">form_relate</field>
+            <field name="model">library.shelf,-1</field>
+            <field name="action" ref="act_open_shelf_exemplaries"/>
+        </record>
+    </data>
+</tryton>

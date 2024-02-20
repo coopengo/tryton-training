@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<tryton>
+    <data>
+        <!-- #################### -->
+        <!-- # Move Exemplaries # -->
+        <!-- #################### -->
+        <record model="ir.action.wizard" id="act_move_exemplaries">
+            <field name="name">Move Exemplaries</field>
+            <field name="wiz_name">library.book.exemplary.move</field>
+        </record>
+        <record model="ir.action.keyword" id="act_move_exemplaries_keyword">
+            <field name="keyword">form_action</field>
+            <field name="model">library.book.exemplary,-1</field>
+            <field name="action" ref="act_move_exemplaries"/>
+        </record>
+        <!-- ################################# -->
+        <!-- # Move Exemplaries Select Shelf # -->
+        <!-- ################################# -->
+        <record model="ir.ui.view" id="move_select_shelf_view_form">
+            <field name="model">library.book.examplary.move.select_shelf</field>
+            <field name="type">form</field>
+            <field name="name">move_select_shelf_form</field>
+        </record>
+        <!-- ################################# -->
+        <!-- # Create Exemplaries Parameters # -->
+        <!-- ################################# -->
+        <record model="ir.ui.view" id="create_exemplaries_parameters_view_form">
+            <field name="model">library.book.create_exemplaries.parameters</field>
+            <field name="inherit" ref="library.create_exemplaries_parameters_view_form"/>
+            <field name="name">create_exemplaries_parameters_form</field>
+        </record>
+        <!-- ################### -->
+        <!-- # Exit quarantine # -->
+        <!-- ################### -->
+        <record model="ir.action.wizard" id="act_exit_quarantine">
+            <field name="name">Exit Quarantine</field>
+            <field name="wiz_name">library.book.exemplary.exit_quarantine</field>
+        </record>
+        <record model="ir.action.keyword" id="act_exit_quarantine_keyword">
+            <field name="keyword">form_action</field>
+            <field name="model">library.book.exemplary,-1</field>
+            <field name="action" ref="act_exit_quarantine"/>
+        </record>
+    </data>
+</tryton>

@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<form>
+    <label name="name"/>
+    <field name="name"/>
+    <label name="floor"/>
+    <field name="floor"/>
+    <field name="shelves" colspan="2"/>
+</form>

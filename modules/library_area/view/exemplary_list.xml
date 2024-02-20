@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<data>
+    <xpath expr="/tree/field[@name='is_available']" position="replace">
+        <field name="status"/>
+    </xpath>
+    <xpath expr="/tree/field[@name='rec_name']" position="after">
+        <field name="floor"/>
+        <field name="room"/>
+        <field name="shelf"/>
+        <field name="out_quarantine_date"/>
+    </xpath>
+</data>

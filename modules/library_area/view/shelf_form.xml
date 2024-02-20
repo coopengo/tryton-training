@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<form>
+    <label name="name"/>
+    <field name="name"/>
+    <field name="exemplaries" colspan="4" readonly="1"/>
+</form>

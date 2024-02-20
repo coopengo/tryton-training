@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<data>
+    <xpath expr="/form" position="inside">
+        <notebook>
+            <page id="destination" string="Destination">
+                <group id="location_or_reserve" string="" colspan="4" yexpand="1">
+                    <group id="location" string="" colspan="2" col="2">
+                        <label name="floor"/>
+                        <field name="floor" widget="selection"/>
+                        <label name="room"/>
+                        <field name="room" widget="selection"/>
+                        <label name="shelf"/>
+                        <field name="shelf" widget="selection"/>
+                    </group>
+                    <group id="reserve" string="" colspan="2" col="2">
+                        <label name="number_to_reserve"/>
+                        <field name="number_to_reserve"/>
+                    </group>
+                </group>
+            </page>
+        </notebook>
+    </xpath>
+</data>
